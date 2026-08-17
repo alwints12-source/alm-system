@@ -2,6 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('/techadmin/users', [UserController::class, 'index'])->name('techadmin.users.index');
+    Route::post('/techadmin/users', [UserController::class, 'store'])->name('techadmin.users.store');
+    Route::patch('/techadmin/users/{user}/toggle', [UserController::class, 'toggleStatus'])->name('techadmin.users.toggle');
+});
 
 Route::get('/', function () {
     return view('welcome');

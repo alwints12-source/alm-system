@@ -1,15 +1,13 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Asset Holder Dashboard
-        </h2>
-    </x-slot>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                Welcome, {{ auth()->user()->name }}. This is the Asset Holder dashboard.
-                Feature goes here.
-            </div>
+<x-prototype-layout title="Asset Holder">
+    <div class="ph">
+        <div class="ph-l">
+            <div class="bc">Asset Holder</div>
+            <div class="pt">Dashboard overview</div>
         </div>
     </div>
-</x-app-layout>
+
+    <div class="card">
+        Welcome, {{ auth()->user()->name }}. This is the Asset Holder dashboard.
+        Feature goes here.
+    </div>
+</x-prototype-layout>
