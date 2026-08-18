@@ -18,7 +18,12 @@ Route::get('/dashboard', function () {
     return match (auth()->user()->role) {
         'administrative_admin' => view('admin.dashboard'),
         'technical_admin'      => view('techadmin.dashboard'),
-        'asset_holder'         => view('holder.dashboard'),
+        'asset_holder'         => view('holder.dashboard', [
+   	     'pendingAssignments' => \App\Models\AssetAssignment::with('asset.category')
+                 ->where('holder_id', auth()->id())
+                 ->where('status', 'pending_acknowledgement')
+                 ->get(),
+        ]),
         'technician'           => view('technician.dashboard'),
         default                => view('dashboard'),
     };
@@ -31,3 +36,15 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+use App\Http\Controllers\AssetController;
+use App\Http\Controllers\AssignmentController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/assets', [AssetController::class, 'index'])->name('admin.assets.index');
+    Route::get('/admin/assets/create', [AssetController::class, 'create'])->name('admin.assets.create');
+    Route::post('/admin/assets', [AssetController::class, 'store'])->name('admin.assets.store');
+
+    Route::get('/holder/assets', [AssignmentController::class, 'index'])->name('holder.assets.index');
+    Route::patch('/holder/assignments/{assignment}/acknowledge', [AssignmentController::class, 'acknowledge'])->name('holder.assignments.acknowledge');
+});
