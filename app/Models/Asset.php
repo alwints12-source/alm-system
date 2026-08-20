@@ -56,13 +56,20 @@ class Asset extends Model
         return $this->hasMany(AssetAssignment::class);
     }
 
-    /**
-     * The current active assignment (pending or acknowledged), if any.
-     */
     public function currentAssignment()
     {
         return $this->hasOne(AssetAssignment::class)
             ->whereIn('status', ['pending_acknowledgement', 'acknowledged'])
             ->latest('assigned_at');
+    }
+
+    /**
+     * All work orders ever raised against this asset — the source of
+     * truth for condition history, since condition only ever changes
+     * when a work order is completed.
+     */
+    public function workOrders()
+    {
+        return $this->hasMany(WorkOrder::class);
     }
 }

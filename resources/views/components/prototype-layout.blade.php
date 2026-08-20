@@ -36,6 +36,8 @@
                     {{-- Admin manages the asset lifecycle: register, inventory, transfers, disposal, reports --}}
                     <a href="{{ route('admin.assets.create') }}" class="sb-item"><i class="ti ti-plus"></i><span>Register Asset</span></a>
                     <a href="{{ route('admin.assets.index') }}" class="sb-item"><i class="ti ti-package"></i><span>Asset Inventory</span></a>
+                    <a href="{{ route('admin.requests.index') }}" class="sb-item"><i class="ti ti-send-2"></i><span>Requests</span></a>
+                    <a href="{{ route('admin.asset-conditions.index') }}" class="sb-item"><i class="ti ti-activity"></i><span>Asset Conditions</span></a>
                     <div class="sb-item"><i class="ti ti-arrows-exchange"></i><span>Transfers</span></div>
                     <div class="sb-item"><i class="ti ti-trash"></i><span>Disposal</span></div>
                     <div class="sb-item"><i class="ti ti-chart-bar"></i><span>Reports</span></div>
@@ -45,9 +47,9 @@
                     <div class="sb-item"><i class="ti ti-shield-lock"></i><span>Roles</span></div>
                 @elseif($role === 'asset_holder')
                     <a href="{{ route('holder.assets.index') }}" class="sb-item"><i class="ti ti-package"></i><span>My Assets</span></a>
-                    <div class="sb-item"><i class="ti ti-clipboard-list"></i><span>Requests</span></div>
+                    <a href="{{ route('holder.requests.index') }}" class="sb-item"><i class="ti ti-clipboard-list"></i><span>Requests</span></a>
                 @elseif($role === 'technician')
-                    <div class="sb-item"><i class="ti ti-tool"></i><span>Work Orders</span></div>
+                    <a href="{{ route('technician.workorders.index') }}" class="sb-item"><i class="ti ti-tool"></i><span>Work Orders</span></a>
                     <div class="sb-item"><i class="ti ti-calendar-time"></i><span>Maintenance Schedule</span></div>
                 @endif
 

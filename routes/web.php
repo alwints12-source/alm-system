@@ -48,3 +48,23 @@ Route::middleware('auth')->group(function () {
     Route::get('/holder/assets', [AssignmentController::class, 'index'])->name('holder.assets.index');
     Route::patch('/holder/assignments/{assignment}/acknowledge', [AssignmentController::class, 'acknowledge'])->name('holder.assignments.acknowledge');
 });
+
+use App\Http\Controllers\WorkOrderController;
+
+Route::middleware('auth')->group(function () {
+    Route::post('/holder/assets/{assignment}/report-issue', [WorkOrderController::class, 'store'])->name('holder.assets.reportIssue');
+
+    Route::get('/admin/requests', [WorkOrderController::class, 'index'])->name('admin.requests.index');
+    Route::patch('/admin/requests/{workOrder}/approve', [WorkOrderController::class, 'approve'])->name('admin.requests.approve');
+    Route::patch('/admin/requests/{workOrder}/reject', [WorkOrderController::class, 'reject'])->name('admin.requests.reject');
+
+    Route::get('/technician/work-orders', [WorkOrderController::class, 'technicianIndex'])->name('technician.workorders.index');
+    Route::get('/technician/work-orders/{workOrder}', [WorkOrderController::class, 'show'])->name('technician.workorders.show');
+    Route::patch('/technician/work-orders/{workOrder}/start', [WorkOrderController::class, 'startWork'])->name('technician.workorders.start');
+    Route::patch('/technician/work-orders/{workOrder}/complete', [WorkOrderController::class, 'complete'])->name('technician.workorders.complete');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/holder/requests', [WorkOrderController::class, 'myRequests'])->name('holder.requests.index');
+    Route::get('/admin/asset-conditions', [WorkOrderController::class, 'assetConditions'])->name('admin.asset-conditions.index');
+});
