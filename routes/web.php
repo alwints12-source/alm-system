@@ -15,16 +15,16 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
+    $pendingAssignments = \App\Models\AssetAssignment::with('asset.category')
+        ->where('holder_id', auth()->id())
+        ->where('status', 'pending_acknowledgement')
+        ->get();
+
     return match (auth()->user()->role) {
-        'administrative_admin' => view('admin.dashboard'),
-        'technical_admin'      => view('techadmin.dashboard'),
-        'asset_holder'         => view('holder.dashboard', [
-   	     'pendingAssignments' => \App\Models\AssetAssignment::with('asset.category')
-                 ->where('holder_id', auth()->id())
-                 ->where('status', 'pending_acknowledgement')
-                 ->get(),
-        ]),
-        'technician'           => view('technician.dashboard'),
+        'administrative_admin' => view('admin.dashboard', compact('pendingAssignments')),
+        'technical_admin'      => view('techadmin.dashboard', compact('pendingAssignments')),
+        'asset_holder'         => view('holder.dashboard', compact('pendingAssignments')),
+        'technician'           => view('technician.dashboard', compact('pendingAssignments')),
         default                => view('dashboard'),
     };
 })->middleware(['auth'])->name('dashboard');

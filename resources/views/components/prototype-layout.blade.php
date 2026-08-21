@@ -50,6 +50,7 @@
                     <a href="{{ route('holder.requests.index') }}" class="sb-item"><i class="ti ti-clipboard-list"></i><span>Requests</span></a>
                 @elseif($role === 'technician')
                     <a href="{{ route('technician.workorders.index') }}" class="sb-item"><i class="ti ti-tool"></i><span>Work Orders</span></a>
+                    <a href="{{ route('holder.assets.index') }}" class="sb-item"><i class="ti ti-package"></i><span>My Assets</span></a>
                     <div class="sb-item"><i class="ti ti-calendar-time"></i><span>Maintenance Schedule</span></div>
                 @endif
 

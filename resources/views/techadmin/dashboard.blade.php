@@ -5,7 +5,7 @@
             <div class="pt">Dashboard overview</div>
         </div>
     </div>
-
+    @include('partials.pending-assignments-banner')
     <div class="card">
         Welcome, {{ auth()->user()->name }}. This is the Technical Admin dashboard.
         Feature goes here.

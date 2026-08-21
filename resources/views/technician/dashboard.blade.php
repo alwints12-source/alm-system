@@ -4,8 +4,9 @@
             <div class="bc">Technician</div>
             <div class="pt">Dashboard overview</div>
         </div>
-    </div>
-
+    </div 
+    >@include('partials.pending-assignments-banner')
+ 
     <div class="card">
         Welcome, {{ auth()->user()->name }}. This is the Technician dashboard.
         Feature goes here.
