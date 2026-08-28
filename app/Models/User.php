@@ -41,4 +41,13 @@ class User extends Authenticatable
     {
         return "{$this->first_name} {$this->last_name}";
     }
+
+    /**
+     * Work orders currently assigned to this user (as a technician).
+     * Used to show workload counts in Admin's assign-technician dropdown.
+     */
+    public function assignedWorkOrders()
+    {
+        return $this->hasMany(WorkOrder::class, 'assigned_to');
+    }
 }

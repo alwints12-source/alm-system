@@ -27,6 +27,7 @@ class WorkOrder extends Model
         'estimated_cost',
         'actual_cost',
         'resolution_notes',
+        'technician_notes',
     ];
 
     protected function casts(): array
@@ -61,10 +62,31 @@ class WorkOrder extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    public function checklistItems()
+    {
+        return $this->hasMany(WorkOrderChecklistItem::class)->orderBy('sort_order');
+    }
+
+    public function activityLog()
+    {
+        return $this->hasMany(WorkOrderActivityLog::class)->orderBy('created_at', 'desc');
+    }
+
     public function isOverdue(): bool
     {
         return $this->due_date
             && $this->due_date->isPast()
             && !in_array($this->status, ['completed', 'cancelled']);
+    }
+
+    public function checklistProgress(): array
+    {
+        $total = $this->checklistItems->count();
+        $done = $this->checklistItems->where('is_completed', true)->count();
+        return [
+            'done'    => $done,
+            'total'   => $total,
+            'percent' => $total > 0 ? round(($done / $total) * 100) : 0,
+        ];
     }
 }

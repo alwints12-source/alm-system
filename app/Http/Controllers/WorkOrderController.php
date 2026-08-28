@@ -6,13 +6,38 @@ use App\Models\AssetAssignment;
 use App\Models\Notification;
 use App\Models\User;
 use App\Models\WorkOrder;
+use App\Models\WorkOrderActivityLog;
+use App\Models\WorkOrderChecklistItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class WorkOrderController extends Controller
 {
+    /**
+     * Standard checklist applied to every approved work order. Not
+     * type-specific yet — a reasonable generic sequence that covers
+     * any repair, deliberately simple rather than per-category
+     * templates.
+     */
+    private const DEFAULT_CHECKLIST = [
+        'Inspect asset and confirm reported issue',
+        'Diagnose root cause',
+        'Perform repair or replacement',
+        'Test asset functionality',
+        'Document work and close out',
+    ];
+
+    private function logActivity(WorkOrder $workOrder, string $description): void
+    {
+        WorkOrderActivityLog::create([
+            'work_order_id'      => $workOrder->id,
+            'event_description'  => $description,
+            'created_by'         => auth()->id(),
+        ]);
+    }
+
     // ============================================================
-    // ASSET HOLDER — report an issue, and track requests already made
+    // ASSET HOLDER
     // ============================================================
 
     public function store(Request $request, AssetAssignment $assignment)
@@ -29,7 +54,7 @@ class WorkOrderController extends Controller
         $nextNumber = (WorkOrder::max('id') ?? 0) + 1;
         $workOrderNumber = 'WO-' . now()->year . '-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
 
-        WorkOrder::create([
+        $workOrder = WorkOrder::create([
             'work_order_number' => $workOrderNumber,
             'asset_id'          => $assignment->asset_id,
             'title'             => $validated['title'],
@@ -41,14 +66,12 @@ class WorkOrderController extends Controller
             'reported_at'       => now(),
         ]);
 
+        $this->logActivity($workOrder, 'Issue reported by ' . auth()->user()->name);
+
         return redirect()->route('holder.assets.index')
             ->with('status', 'Issue reported. Admin will review and assign a technician.');
     }
 
-    /**
-     * "My Requests" — everything this holder has ever reported, with
-     * live status and resolution notes once closed.
-     */
     public function myRequests()
     {
         $requests = WorkOrder::with('asset', 'assignedTo')
@@ -60,7 +83,7 @@ class WorkOrderController extends Controller
     }
 
     // ============================================================
-    // ADMINISTRATIVE ADMIN — review requests, approve & assign, or reject
+    // ADMINISTRATIVE ADMIN
     // ============================================================
 
     public function index()
@@ -69,8 +92,12 @@ class WorkOrderController extends Controller
             ->orderBy('reported_at', 'desc')
             ->get();
 
+        // Workload count per technician — open work orders only
         $technicians = User::where('role', 'technician')
             ->where('is_active', true)
+            ->withCount(['assignedWorkOrders as open_jobs' => function ($query) {
+                $query->whereIn('status', ['assigned', 'in_progress']);
+            }])
             ->orderBy('first_name')
             ->get();
 
@@ -80,23 +107,38 @@ class WorkOrderController extends Controller
     public function approve(Request $request, WorkOrder $workOrder)
     {
         $validated = $request->validate([
-            'assigned_to'      => ['required', 'exists:users,id'],
-            'due_date'         => ['required', 'date'],
-            'due_time'         => ['required'],
-            'maintenance_type' => ['required', 'in:preventive,corrective,predictive,emergency'],
-            'estimated_cost'   => ['nullable', 'numeric', 'min:0'],
+            'assigned_to'       => ['required', 'exists:users,id'],
+            'due_date'          => ['required', 'date'],
+            'due_time'          => ['required'],
+            'maintenance_type'  => ['required', 'in:preventive,corrective,predictive,emergency'],
+            'estimated_cost'    => ['nullable', 'numeric', 'min:0'],
+            'technician_notes'  => ['nullable', 'string'],
         ]);
 
         $dueDateTime = $validated['due_date'] . ' ' . $validated['due_time'];
 
-        $workOrder->update([
-            'assigned_to'      => $validated['assigned_to'],
-            'approved_by'      => auth()->id(),
-            'due_date'         => $dueDateTime,
-            'maintenance_type' => $validated['maintenance_type'],
-            'estimated_cost'   => $validated['estimated_cost'] ?? null,
-            'status'           => 'assigned',
-        ]);
+        DB::transaction(function () use ($workOrder, $validated, $dueDateTime) {
+            $workOrder->update([
+                'assigned_to'      => $validated['assigned_to'],
+                'approved_by'      => auth()->id(),
+                'due_date'         => $dueDateTime,
+                'maintenance_type' => $validated['maintenance_type'],
+                'estimated_cost'   => $validated['estimated_cost'] ?? null,
+                'technician_notes' => $validated['technician_notes'] ?? null,
+                'status'           => 'assigned',
+            ]);
+
+            foreach (self::DEFAULT_CHECKLIST as $index => $description) {
+                WorkOrderChecklistItem::create([
+                    'work_order_id' => $workOrder->id,
+                    'description'   => $description,
+                    'sort_order'    => $index,
+                ]);
+            }
+
+            $technicianName = User::find($validated['assigned_to'])->name;
+            $this->logActivity($workOrder, "Approved and assigned to {$technicianName}");
+        });
 
         Notification::create([
             'recipient_id' => $workOrder->requested_by,
@@ -104,6 +146,15 @@ class WorkOrderController extends Controller
             'channel'      => 'in_app',
             'title'        => 'Your maintenance request was approved',
             'body'         => "{$workOrder->title} has been assigned to a technician, scheduled for " . \Carbon\Carbon::parse($dueDateTime)->format('M j, Y g:i A') . '.',
+            'related_type' => 'work_order',
+            'related_id'   => $workOrder->id,
+        ]);
+        Notification::create([
+            'recipient_id' => $workOrder->assigned_to,
+            'type'         => 'work_order.new_assignment',
+            'channel'      => 'in_app',
+            'title'        => 'New work order assigned to you',
+            'body'         => "{$workOrder->title} ({$workOrder->asset->asset_tag}) has been assigned to you, due " . \Carbon\Carbon::parse($dueDateTime)->format('M j, Y g:i A') . '.',
             'related_type' => 'work_order',
             'related_id'   => $workOrder->id,
         ]);
@@ -124,12 +175,14 @@ class WorkOrderController extends Controller
             'resolution_notes' => $validated['resolution_notes'] ?? null,
         ]);
 
+        $this->logActivity($workOrder, 'Rejected by ' . auth()->user()->name);
+
         return redirect()->route('admin.requests.index')
             ->with('status', 'Request rejected.');
     }
 
     // ============================================================
-    // TECHNICIAN — see assigned work, execute, complete
+    // TECHNICIAN
     // ============================================================
 
     public function technicianIndex()
@@ -146,9 +199,27 @@ class WorkOrderController extends Controller
     {
         abort_if($workOrder->assigned_to !== auth()->id(), 403);
 
-        $workOrder->load('asset', 'requestedBy');
+        $workOrder->load('asset', 'requestedBy', 'checklistItems', 'activityLog.createdBy');
 
         return view('technician.workorders.show', compact('workOrder'));
+    }
+
+    public function toggleChecklistItem(WorkOrderChecklistItem $item)
+    {
+        $workOrder = $item->workOrder;
+        abort_if($workOrder->assigned_to !== auth()->id(), 403);
+
+        $item->update([
+            'is_completed' => ! $item->is_completed,
+            'completed_at' => ! $item->is_completed ? now() : null,
+        ]);
+
+        $this->logActivity(
+            $workOrder,
+            ($item->is_completed ? 'Checked: ' : 'Unchecked: ') . $item->description
+        );
+
+        return redirect()->route('technician.workorders.show', $workOrder);
     }
 
     public function startWork(WorkOrder $workOrder)
@@ -158,6 +229,18 @@ class WorkOrderController extends Controller
         $workOrder->update([
             'status'     => 'in_progress',
             'started_at' => now(),
+        ]);
+
+        $this->logActivity($workOrder, 'Work started');
+
+        Notification::create([
+            'recipient_id' => $workOrder->requested_by,
+            'type'         => 'work_order.started',
+            'channel'      => 'in_app',
+            'title'        => 'Work has started on your request',
+            'body'         => "{$workOrder->title} is now being worked on.",
+            'related_type' => 'work_order',
+            'related_id'   => $workOrder->id,
         ]);
 
         return redirect()->route('technician.workorders.show', $workOrder)
@@ -186,6 +269,8 @@ class WorkOrderController extends Controller
                 'condition' => $validated['condition'],
                 'status'    => 'active',
             ]);
+
+            $this->logActivity($workOrder, 'Marked complete — asset condition set to ' . ucfirst($validated['condition']));
 
             Notification::create([
                 'recipient_id' => $workOrder->requested_by,

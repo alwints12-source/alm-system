@@ -68,3 +68,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/holder/requests', [WorkOrderController::class, 'myRequests'])->name('holder.requests.index');
     Route::get('/admin/asset-conditions', [WorkOrderController::class, 'assetConditions'])->name('admin.asset-conditions.index');
 });
+
+Route::middleware('auth')->group(function () {
+    Route::patch('/technician/checklist/{item}/toggle', [WorkOrderController::class, 'toggleChecklistItem'])->name('technician.workorders.checklist.toggle');
+});

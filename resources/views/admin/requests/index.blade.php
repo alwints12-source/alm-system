@@ -66,7 +66,9 @@
                         <select name="assigned_to" required>
                             <option value="">Select technician</option>
                             @foreach ($technicians as $tech)
-                                <option value="{{ $tech->id }}">{{ $tech->first_name }} {{ $tech->last_name }}</option>
+                                <option value="{{ $tech->id }}">
+                                    {{ $tech->first_name }} {{ $tech->last_name }} — {{ $tech->open_jobs }} open {{ Str::plural('job', $tech->open_jobs) }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -98,8 +100,13 @@
                         </div>
                     </div>
 
+                    <div class="fg">
+                        <label>Notes to technician</label>
+                        <textarea name="technician_notes" placeholder="Any additional instructions or context for the assigned technician..."></textarea>
+                    </div>
+
                     <div style="background:#f0fdf4;border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:11.5px;color:#2d7d32">
-                        On approval, this becomes an active work order and the asset holder is notified with the scheduled date and assigned technician.
+                        On approval, a standard 5-step checklist is created automatically and the asset holder is notified with the scheduled date and assigned technician.
                     </div>
 
                     <div class="fa">
