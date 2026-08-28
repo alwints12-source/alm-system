@@ -72,3 +72,11 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::patch('/technician/checklist/{item}/toggle', [WorkOrderController::class, 'toggleChecklistItem'])->name('technician.workorders.checklist.toggle');
 });
+
+use App\Http\Controllers\MfaController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('/settings/mfa', [MfaController::class, 'show'])->name('settings.mfa');
+    Route::post('/settings/mfa/enable', [MfaController::class, 'enable'])->name('settings.mfa.enable');
+    Route::delete('/settings/mfa/disable', [MfaController::class, 'disable'])->name('settings.mfa.disable');
+});

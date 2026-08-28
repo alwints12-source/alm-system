@@ -20,6 +20,9 @@ class User extends Authenticatable
         'department',
         'position',
         'contact_number',
+        'mfa_secret',
+        'mfa_enabled',
+        'mfa_confirmed_at',
     ];
 
     protected $hidden = [
@@ -34,6 +37,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
             'mfa_enabled' => 'boolean',
+            'mfa_confirmed_at' => 'datetime',
         ];
     }
 

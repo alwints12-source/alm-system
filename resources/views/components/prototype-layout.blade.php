@@ -56,7 +56,7 @@
 
                 <div class="sb-sect">General</div>
                 <div class="sb-item"><i class="ti ti-bell"></i><span>Notifications</span></div>
-                <div class="sb-item"><i class="ti ti-settings"></i><span>Settings</span></div>
+                <a href="{{ route('settings.mfa') }}" class="sb-item"><i class="ti ti-settings"></i><span>Settings</span></a>
             </nav>
 
             <div class="sb-footer">
