@@ -80,3 +80,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/mfa/enable', [MfaController::class, 'enable'])->name('settings.mfa.enable');
     Route::delete('/settings/mfa/disable', [MfaController::class, 'disable'])->name('settings.mfa.disable');
 });
+
+use App\Http\Controllers\Auth\MfaLoginController;
+
+Route::middleware('guest')->group(function () {
+    Route::get('/mfa/challenge', [MfaLoginController::class, 'challenge'])->name('mfa.challenge');
+    Route::post('/mfa/verify', [MfaLoginController::class, 'verify'])->name('mfa.verify');
+});
