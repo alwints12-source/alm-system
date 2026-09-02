@@ -87,3 +87,14 @@ Route::middleware('guest')->group(function () {
     Route::get('/mfa/challenge', [MfaLoginController::class, 'challenge'])->name('mfa.challenge');
     Route::post('/mfa/verify', [MfaLoginController::class, 'verify'])->name('mfa.verify');
 });
+
+use App\Http\Controllers\SlaPolicyController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/sla-policies', [SlaPolicyController::class, 'index'])->name('admin.sla-policies.index');
+    Route::get('/admin/sla-policies/create', [SlaPolicyController::class, 'create'])->name('admin.sla-policies.create');
+    Route::post('/admin/sla-policies', [SlaPolicyController::class, 'store'])->name('admin.sla-policies.store');
+    Route::get('/admin/sla-policies/{slaPolicy}/edit', [SlaPolicyController::class, 'edit'])->name('admin.sla-policies.edit');
+    Route::patch('/admin/sla-policies/{slaPolicy}', [SlaPolicyController::class, 'update'])->name('admin.sla-policies.update');
+    Route::patch('/admin/sla-policies/{slaPolicy}/toggle', [SlaPolicyController::class, 'toggleActive'])->name('admin.sla-policies.toggle');
+});
