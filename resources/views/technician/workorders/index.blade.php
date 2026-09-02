@@ -29,6 +29,26 @@
                 $statusLabel = match($wo->status) {
                     'assigned' => 'Assigned', 'in_progress' => 'In progress', 'completed' => 'Completed', default => ucfirst($wo->status),
                 };
+
+                $slaBadge = null;
+                if (in_array($wo->status, ['assigned', 'in_progress'])) {
+                    if ($wo->sla_breached) {
+                        $slaBadge = ['text' => 'SLA breached', 'color' => '#e24b4a'];
+                    } else {
+                        $dueAt = $wo->resolutionDueAt();
+                        if ($dueAt) {
+                            if ($dueAt->isPast()) {
+                                $slaBadge = ['text' => 'Resolution overdue', 'color' => '#e24b4a'];
+                            } else {
+                                $seconds = now()->diffInSeconds($dueAt);
+                                $hours = intdiv($seconds, 3600);
+                                $minutes = intdiv($seconds % 3600, 60);
+                                $precise = $hours > 0 ? "{$hours}h {$minutes}m" : "{$minutes}m";
+                                $slaBadge = ['text' => "Due in {$precise}", 'color' => '#185fa5'];
+                            }
+                        }
+                    }
+                }
             @endphp
             <div class="card" style="margin-bottom:14px;border-left:3px solid {{ $wo->isOverdue() ? '#e24b4a' : '#4a9eff' }}">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
@@ -36,7 +56,10 @@
                         <div style="font-size:11px;color:#94a3b8">{{ $wo->work_order_number }}</div>
                         <div style="font-weight:700;font-size:14.5px;color:#0f2d5e;margin-top:2px">{{ $wo->title }}</div>
                     </div>
-                    <div style="display:flex;gap:5px">
+                    <div style="display:flex;gap:5px;align-items:center">
+                        @if ($slaBadge)
+                            <span style="font-size:10.5px;font-weight:600;color:{{ $slaBadge['color'] }}">{{ $slaBadge['text'] }}</span>
+                        @endif
                         <span class="badge {{ $priorityClass }}">{{ ucfirst($wo->priority) }}</span>
                         @if ($wo->isOverdue())
                             <span class="badge b-over">Overdue</span>

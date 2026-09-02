@@ -13,12 +13,6 @@ use Illuminate\Support\Facades\DB;
 
 class WorkOrderController extends Controller
 {
-    /**
-     * Standard checklist applied to every approved work order. Not
-     * type-specific yet — a reasonable generic sequence that covers
-     * any repair, deliberately simple rather than per-category
-     * templates.
-     */
     private const DEFAULT_CHECKLIST = [
         'Inspect asset and confirm reported issue',
         'Diagnose root cause',
@@ -88,11 +82,10 @@ class WorkOrderController extends Controller
 
     public function index()
     {
-        $requests = WorkOrder::with('asset', 'requestedBy', 'assignedTo')
+        $requests = WorkOrder::with('asset.category', 'requestedBy', 'assignedTo', 'slaPolicy')
             ->orderBy('reported_at', 'desc')
             ->get();
 
-        // Workload count per technician — open work orders only
         $technicians = User::where('role', 'technician')
             ->where('is_active', true)
             ->withCount(['assignedWorkOrders as open_jobs' => function ($query) {
@@ -116,17 +109,43 @@ class WorkOrderController extends Controller
         ]);
 
         $dueDateTime = $validated['due_date'] . ' ' . $validated['due_time'];
+        $approvedAt = now();
 
-        DB::transaction(function () use ($workOrder, $validated, $dueDateTime) {
+        DB::transaction(function () use ($workOrder, $validated, $dueDateTime, $approvedAt) {
             $workOrder->update([
                 'assigned_to'      => $validated['assigned_to'],
                 'approved_by'      => auth()->id(),
+                'approved_at'      => $approvedAt,
                 'due_date'         => $dueDateTime,
                 'maintenance_type' => $validated['maintenance_type'],
                 'estimated_cost'   => $validated['estimated_cost'] ?? null,
                 'technician_notes' => $validated['technician_notes'] ?? null,
                 'status'           => 'assigned',
             ]);
+
+            // SLA: find the applicable policy, lock it in. Response
+            // breach is checked against reported_at (how long the
+            // Holder waited to be acknowledged at all) — unaffected
+            // by today's change, which only touches resolution timing.
+            $policy = $workOrder->fresh('asset')->matchingSlaPolicy();
+
+            if ($policy) {
+                $responseDeadline = $workOrder->reported_at->copy()->addHours($policy->response_time_hours);
+                $responseBreached = $approvedAt->greaterThan($responseDeadline);
+
+                $workOrder->update([
+                    'sla_id'          => $policy->id,
+                    'sla_breached'    => $responseBreached,
+                    'sla_breached_at' => $responseBreached ? $approvedAt : null,
+                ]);
+
+                $this->logActivity(
+                    $workOrder,
+                    $responseBreached
+                        ? "SLA response target missed ({$policy->response_time_hours}h target)"
+                        : "SLA policy applied: {$policy->name}"
+                );
+            }
 
             foreach (self::DEFAULT_CHECKLIST as $index => $description) {
                 WorkOrderChecklistItem::create([
@@ -149,6 +168,7 @@ class WorkOrderController extends Controller
             'related_type' => 'work_order',
             'related_id'   => $workOrder->id,
         ]);
+
         Notification::create([
             'recipient_id' => $workOrder->assigned_to,
             'type'         => 'work_order.new_assignment',
@@ -187,7 +207,7 @@ class WorkOrderController extends Controller
 
     public function technicianIndex()
     {
-        $workOrders = WorkOrder::with('asset', 'requestedBy')
+        $workOrders = WorkOrder::with('asset', 'requestedBy', 'slaPolicy')
             ->where('assigned_to', auth()->id())
             ->orderBy('due_date')
             ->get();
@@ -199,7 +219,7 @@ class WorkOrderController extends Controller
     {
         abort_if($workOrder->assigned_to !== auth()->id(), 403);
 
-        $workOrder->load('asset', 'requestedBy', 'checklistItems', 'activityLog.createdBy');
+        $workOrder->load('asset', 'requestedBy', 'checklistItems', 'activityLog.createdBy', 'slaPolicy');
 
         return view('technician.workorders.show', compact('workOrder'));
     }
@@ -258,12 +278,33 @@ class WorkOrderController extends Controller
         ]);
 
         DB::transaction(function () use ($workOrder, $validated) {
+            $completedAt = now();
+
             $workOrder->update([
                 'status'           => 'completed',
-                'completed_at'     => now(),
+                'completed_at'     => $completedAt,
                 'resolution_notes' => $validated['resolution_notes'],
                 'actual_cost'      => $validated['actual_cost'] ?? null,
             ]);
+
+            // SLA resolution check — measured from approval, not
+            // report, per the design change: this is the Technician's
+            // working-time budget, not the Holder's total wait.
+            if ($workOrder->slaPolicy && !$workOrder->sla_breached) {
+                $resolutionStartPoint = $workOrder->approved_at ?? $workOrder->reported_at;
+                $resolutionDeadline = $resolutionStartPoint->copy()->addHours($workOrder->slaPolicy->resolution_time_hours);
+                $resolutionBreached = $completedAt->greaterThan($resolutionDeadline);
+
+                if ($resolutionBreached) {
+                    $workOrder->update([
+                        'sla_breached'    => true,
+                        'sla_breached_at' => $completedAt,
+                    ]);
+                    $this->logActivity($workOrder, "SLA resolution target missed ({$workOrder->slaPolicy->resolution_time_hours}h target)");
+                } else {
+                    $this->logActivity($workOrder, 'Resolved within SLA target');
+                }
+            }
 
             $workOrder->asset->update([
                 'condition' => $validated['condition'],
