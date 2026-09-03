@@ -7,14 +7,17 @@ use Illuminate\Http\Request;
 
 class AssignmentController extends Controller
 {
-    /**
-     * "My Assets" — only assets this user has actually acknowledged.
-     * Pending ones are deliberately excluded here; they live on the
-     * dashboard until confirmed.
-     */
     public function index()
     {
-        $assignments = AssetAssignment::with('asset.category', 'asset.location')
+        $assignments = AssetAssignment::with([
+            'asset.category',
+            'asset.location',
+            'asset.workOrders' => function ($query) {
+                $query->where('status', 'completed')
+                      ->with('assignedTo')
+                      ->orderBy('completed_at', 'desc');
+            },
+        ])
             ->where('holder_id', auth()->id())
             ->where('status', 'acknowledged')
             ->orderBy('acknowledged_at', 'desc')
@@ -23,9 +26,6 @@ class AssignmentController extends Controller
         return view('holder.assets.index', compact('assignments'));
     }
 
-    /**
-     * Acknowledge receipt of an asset — called from the dashboard banner.
-     */
     public function acknowledge(AssetAssignment $assignment)
     {
         abort_if($assignment->holder_id !== auth()->id(), 403);

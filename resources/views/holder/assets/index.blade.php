@@ -19,7 +19,10 @@
         </div>
     @else
         @foreach ($assignments as $assignment)
-            @php $asset = $assignment->asset; @endphp
+            @php
+                $asset = $assignment->asset;
+                $repairCount = $asset->workOrders->count();
+            @endphp
             <div class="card" style="margin-bottom:14px">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
                     <div>
@@ -49,6 +52,34 @@
                         <div style="font-size:13px;text-transform:capitalize">{{ $asset->condition }}</div>
                     </div>
                 </div>
+
+                @if ($repairCount > 0)
+                    <div style="margin-top:14px;border-top:1px solid #f1f5f9;padding-top:12px">
+                        <button type="button" class="ac v" style="font-size:11.5px" onclick="
+                            const el = document.getElementById('repair-history-{{ $assignment->id }}');
+                            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+                        ">
+                            <i class="ti ti-history" style="font-size:12px"></i> Repair history ({{ $repairCount }})
+                        </button>
+
+                        <div id="repair-history-{{ $assignment->id }}" style="display:none;margin-top:10px">
+                            @foreach ($asset->workOrders as $wo)
+                                <div style="background:#f8fafc;border-radius:6px;padding:9px 12px;margin-bottom:6px;font-size:12px">
+                                    <div style="display:flex;justify-content:space-between">
+                                        <strong>{{ $wo->title }}</strong>
+                                        <span style="color:#94a3b8">{{ $wo->completed_at->format('M j, Y') }}</span>
+                                    </div>
+                                    <div style="color:#64748b;font-size:11.5px;margin-top:2px">
+                                        Fixed by {{ $wo->assignedTo->first_name ?? '' }} {{ $wo->assignedTo->last_name ?? '' }}
+                                        @if ($wo->resolution_notes)
+                                            — {{ $wo->resolution_notes }}
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
 
                 <div style="margin-top:14px;display:flex;gap:8px">
                     <button class="btn sm" disabled title="Coming in a later sprint">View full details</button>
