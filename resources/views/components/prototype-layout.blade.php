@@ -40,7 +40,8 @@
                     <a href="{{ route('admin.requests.index') }}" class="sb-item"><i class="ti ti-send-2"></i><span>Requests</span></a>
                     <a href="{{ route('admin.asset-conditions.index') }}" class="sb-item"><i class="ti ti-activity"></i><span>Asset Conditions</span></a>
                     <a href="{{ route('admin.sla-policies.index') }}" class="sb-item"><i class="ti ti-shield-check"></i><span>SLA & Compliance</span></a>
-                    <div class="sb-item"><i class="ti ti-arrows-exchange"></i><span>Transfers</span></div>
+                    <a href="{{ route('admin.maintenance-schedules.index') }}" class="sb-item"><i class="ti ti-calendar-time"></i><span>Maintenance Schedule</span></a>
+                    <a href="{{ route('admin.transfers.index') }}" class="sb-item"><i class="ti ti-arrows-exchange"></i><span>Transfers</span></a>
                     <div class="sb-item"><i class="ti ti-trash"></i><span>Disposal</span></div>
                     <div class="sb-item"><i class="ti ti-chart-bar"></i><span>Reports</span></div>
                 @elseif($role === 'technical_admin')
@@ -53,7 +54,7 @@
                 @elseif($role === 'technician')
                     <a href="{{ route('technician.workorders.index') }}" class="sb-item"><i class="ti ti-tool"></i><span>Work Orders</span></a>
                     <a href="{{ route('holder.assets.index') }}" class="sb-item"><i class="ti ti-package"></i><span>My Assets</span></a>
-                    <div class="sb-item"><i class="ti ti-calendar-time"></i><span>Maintenance Schedule</span></div>
+                    <a href="{{ route('technician.maintenance-schedule.index') }}" class="sb-item"><i class="ti ti-calendar-time"></i><span>Maintenance Schedule</span></a>
                 @endif
 
                 <div class="sb-sect">General</div>

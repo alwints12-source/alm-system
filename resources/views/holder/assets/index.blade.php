@@ -83,13 +83,57 @@
 
                 <div style="margin-top:14px;display:flex;gap:8px">
                     <button class="btn sm" disabled title="Coming in a later sprint">View full details</button>
+                    <button class="btn sm" onclick="document.getElementById('modal-transfer-{{ $assignment->id }}').style.display='flex'">
+                        <i class="ti ti-arrows-exchange" style="font-size:13px"></i> Request transfer
+                    </button>
                     <button class="btn pri sm" onclick="document.getElementById('modal-report-{{ $assignment->id }}').style.display='flex'">
                         <i class="ti ti-alert-triangle" style="font-size:13px"></i> Report issue
                     </button>
                 </div>
             </div>
 
-            {{-- Report Issue modal for this asset --}}
+            {{-- Request Transfer modal --}}
+            <div id="modal-transfer-{{ $assignment->id }}" class="modal-overlay">
+                <div class="modal-box">
+                    <div class="modal-hdr">
+                        <div class="modal-ttl">Request transfer — {{ $asset->name }}</div>
+                        <button class="modal-close" onclick="document.getElementById('modal-transfer-{{ $assignment->id }}').style.display='none'">&times;</button>
+                    </div>
+
+                    <form method="POST" action="{{ route('holder.assets.requestTransfer', $assignment) }}">
+                        @csrf
+
+                        <div class="fg">
+                            <label>Transfer to *</label>
+                            <select name="to_holder_id" required>
+                                <option value="">Select colleague</option>
+                                @foreach ($allUsers as $user)
+                                    @if ($user->id !== auth()->id())
+                                        <option value="{{ $user->id }}">{{ $user->first_name }} {{ $user->last_name }} ({{ \Illuminate\Support\Str::headline($user->role) }})</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="fg">
+                            <label>Reason *</label>
+                            <textarea name="reason" placeholder="Why does this asset need to be transferred?" required></textarea>
+                        </div>
+
+                        <div style="background:#e3f2fd;border-radius:6px;padding:8px 11px;margin-bottom:14px;font-size:12px;color:#185fa5">
+                            <i class="ti ti-info-circle" style="font-size:13px"></i>
+                            This sends a request to Admin for approval — the asset won't move until they review it.
+                        </div>
+
+                        <div class="fa">
+                            <button type="submit" class="btn pri sm">Submit request</button>
+                            <button type="button" class="btn sm" onclick="document.getElementById('modal-transfer-{{ $assignment->id }}').style.display='none'">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {{-- Report Issue modal (unchanged) --}}
             <div id="modal-report-{{ $assignment->id }}" class="modal-overlay">
                 <div class="modal-box">
                     <div class="modal-hdr">

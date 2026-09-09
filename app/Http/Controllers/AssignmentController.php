@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AssetAssignment;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AssignmentController extends Controller
@@ -23,7 +24,9 @@ class AssignmentController extends Controller
             ->orderBy('acknowledged_at', 'desc')
             ->get();
 
-        return view('holder.assets.index', compact('assignments'));
+        $allUsers = User::where('is_active', true)->orderBy('first_name')->get();
+
+        return view('holder.assets.index', compact('assignments', 'allUsers'));
     }
 
     public function acknowledge(AssetAssignment $assignment)

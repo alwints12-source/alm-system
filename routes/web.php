@@ -98,3 +98,30 @@ Route::middleware('auth')->group(function () {
     Route::patch('/admin/sla-policies/{slaPolicy}', [SlaPolicyController::class, 'update'])->name('admin.sla-policies.update');
     Route::patch('/admin/sla-policies/{slaPolicy}/toggle', [SlaPolicyController::class, 'toggleActive'])->name('admin.sla-policies.toggle');
 });
+
+use App\Http\Controllers\MaintenanceScheduleController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/maintenance-schedules', [MaintenanceScheduleController::class, 'index'])->name('admin.maintenance-schedules.index');
+    Route::get('/admin/maintenance-schedules/create', [MaintenanceScheduleController::class, 'create'])->name('admin.maintenance-schedules.create');
+    Route::post('/admin/maintenance-schedules', [MaintenanceScheduleController::class, 'store'])->name('admin.maintenance-schedules.store');
+    Route::get('/admin/maintenance-schedules/{maintenanceSchedule}/edit', [MaintenanceScheduleController::class, 'edit'])->name('admin.maintenance-schedules.edit');
+    Route::patch('/admin/maintenance-schedules/{maintenanceSchedule}', [MaintenanceScheduleController::class, 'update'])->name('admin.maintenance-schedules.update');
+    Route::patch('/admin/maintenance-schedules/{maintenanceSchedule}/toggle', [MaintenanceScheduleController::class, 'toggleActive'])->name('admin.maintenance-schedules.toggle');
+
+    Route::get('/technician/maintenance-schedule', [MaintenanceScheduleController::class, 'technicianIndex'])->name('technician.maintenance-schedule.index');
+});
+
+use App\Http\Controllers\AssetTransferController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/transfers', [AssetTransferController::class, 'index'])->name('admin.transfers.index');
+    Route::get('/admin/transfers/create', [AssetTransferController::class, 'create'])->name('admin.transfers.create');
+    Route::post('/admin/transfers', [AssetTransferController::class, 'store'])->name('admin.transfers.store');
+    Route::patch('/admin/transfers/{transfer}/approve', [AssetTransferController::class, 'approve'])->name('admin.transfers.approve');
+    Route::patch('/admin/transfers/{transfer}/reject', [AssetTransferController::class, 'reject'])->name('admin.transfers.reject');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::post('/holder/assets/{assignment}/request-transfer', [AssetTransferController::class, 'holderStore'])->name('holder.assets.requestTransfer');
+});
