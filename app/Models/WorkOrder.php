@@ -32,6 +32,7 @@ class WorkOrder extends Model
         'sla_id',
         'sla_breached',
         'sla_breached_at',
+        'schedule_id',
     ];
 
     protected function casts(): array
@@ -84,6 +85,11 @@ class WorkOrder extends Model
         return $this->belongsTo(SlaPolicy::class, 'sla_id');
     }
 
+    public function schedule()
+    {
+        return $this->belongsTo(MaintenanceSchedule::class, 'schedule_id');
+    }
+
     public function isOverdue(): bool
     {
         return $this->due_date
@@ -133,11 +139,6 @@ class WorkOrder extends Model
             ->first();
     }
 
-    /**
-     * Response target is always measured from when the issue was
-     * reported — this deadline is about how long the Holder waited
-     * to be acknowledged at all, before anyone owned the work.
-     */
     public function responseDueAt(): ?\Carbon\Carbon
     {
         $policy = $this->slaPolicy ?? $this->matchingSlaPolicy();
@@ -146,12 +147,6 @@ class WorkOrder extends Model
         return $this->reported_at->copy()->addHours($policy->response_time_hours);
     }
 
-    /**
-     * Resolution target is measured from APPROVAL, not report — this
-     * is the Technician's actual working-time budget, not the
-     * Holder's total wait including queue time. Falls back to
-     * reported_at for any record approved before this column existed.
-     */
     public function resolutionDueAt(): ?\Carbon\Carbon
     {
         $policy = $this->slaPolicy ?? $this->matchingSlaPolicy();
