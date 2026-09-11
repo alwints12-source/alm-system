@@ -125,19 +125,32 @@
                         <div class="fg2">
                             <div class="fg">
                                 <label>Asset condition after repair *</label>
-                                <select name="condition" required>
+                                <select name="condition" id="condition-select" required onchange="
+                                    document.getElementById('disposal-request-section').style.display =
+                                        this.value === 'unserviceable' ? 'block' : 'none';
+                                ">
                                     <option value="">Select condition</option>
                                     <option value="excellent">Excellent</option>
                                     <option value="good">Good</option>
                                     <option value="fair">Fair</option>
                                     <option value="poor">Poor</option>
-                                    <option value="unserviceable">Unserviceable</option>
+                                    <option value="unserviceable">Unserviceable — cannot be economically repaired</option>
                                 </select>
                             </div>
                             <div class="fg">
                                 <label>Actual cost (₱)</label>
                                 <input type="number" step="0.01" name="actual_cost" placeholder="0.00">
                             </div>
+                        </div>
+
+                        <div id="disposal-request-section" style="display:none;background:#fff0f0;border:1px solid #fbc5c5;border-radius:8px;padding:12px;margin-bottom:14px">
+                            <label style="display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:#a32d2d;cursor:pointer;margin-bottom:0">
+                                <input type="checkbox" name="request_disposal" value="1" style="margin-top:2px">
+                                <span>
+                                    <strong>Request disposal for this asset</strong><br>
+                                    <span style="font-weight:400">Since it's unserviceable, flag it for Admin to review for disposal — it won't be removed from inventory until approved.</span>
+                                </span>
+                            </label>
                         </div>
 
                         <div style="background:#e3f2fd;border-radius:6px;padding:8px 11px;margin-bottom:14px;font-size:12px;color:#185fa5">

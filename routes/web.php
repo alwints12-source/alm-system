@@ -125,3 +125,13 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/holder/assets/{assignment}/request-transfer', [AssetTransferController::class, 'holderStore'])->name('holder.assets.requestTransfer');
 });
+
+use App\Http\Controllers\AssetDisposalController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/disposals', [AssetDisposalController::class, 'index'])->name('admin.disposals.index');
+    Route::get('/admin/disposals/create', [AssetDisposalController::class, 'create'])->name('admin.disposals.create');
+    Route::post('/admin/disposals', [AssetDisposalController::class, 'store'])->name('admin.disposals.store');
+    Route::patch('/admin/disposals/{disposal}/approve', [AssetDisposalController::class, 'approve'])->name('admin.disposals.approve');
+    Route::patch('/admin/disposals/{disposal}/reject', [AssetDisposalController::class, 'reject'])->name('admin.disposals.reject');
+});

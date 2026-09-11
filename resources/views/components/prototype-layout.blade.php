@@ -42,7 +42,7 @@
                     <a href="{{ route('admin.sla-policies.index') }}" class="sb-item"><i class="ti ti-shield-check"></i><span>SLA & Compliance</span></a>
                     <a href="{{ route('admin.maintenance-schedules.index') }}" class="sb-item"><i class="ti ti-calendar-time"></i><span>Maintenance Schedule</span></a>
                     <a href="{{ route('admin.transfers.index') }}" class="sb-item"><i class="ti ti-arrows-exchange"></i><span>Transfers</span></a>
-                    <div class="sb-item"><i class="ti ti-trash"></i><span>Disposal</span></div>
+                    <a href="{{ route('admin.disposals.index') }}" class="sb-item"><i class="ti ti-trash"></i><span>Disposal</span></a>
                     <div class="sb-item"><i class="ti ti-chart-bar"></i><span>Reports</span></div>
                 @elseif($role === 'technical_admin')
                     {{-- Tech Admin manages system users and roles --}}

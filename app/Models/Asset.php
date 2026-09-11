@@ -29,6 +29,7 @@ class Asset extends Model
         'salvage_value',
         'warranty_expiry_date',
         'created_by',
+        'disposal_date',
     ];
 
     protected function casts(): array
