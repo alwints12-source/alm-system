@@ -141,3 +141,10 @@ use App\Http\Controllers\WarrantyController;
 Route::middleware('auth')->group(function () {
     Route::get('/admin/warranty', [WarrantyController::class, 'index'])->name('admin.warranty.index');
 });
+
+use App\Http\Controllers\DepreciationController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/depreciation', [DepreciationController::class, 'index'])->name('admin.depreciation.index');
+    Route::get('/admin/depreciation/export', [DepreciationController::class, 'exportCsv'])->name('admin.depreciation.export');
+});
