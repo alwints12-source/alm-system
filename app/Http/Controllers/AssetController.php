@@ -59,6 +59,8 @@ class AssetController extends Controller
             'status'                => ['required', 'in:active,in_maintenance,in_storage,disposed'],
             'description'           => ['nullable', 'string'],
             'assign_to'             => ['nullable', 'exists:users,id'],
+            'useful_life_years'     => ['required', 'integer', 'min:1'],
+            'salvage_value'         => ['nullable', 'numeric', 'min:0', 'lte:acquisition_cost'],
         ]);
 
         DB::transaction(function () use ($validated) {
@@ -78,8 +80,8 @@ class AssetController extends Controller
                 'status'                => $validated['status'],
                 'condition'             => 'good',
                 'description'           => $validated['description'] ?? null,
-                'useful_life_years'     => 5,
-                'salvage_value'         => 0,
+                'useful_life_years'     => $validated['useful_life_years'],
+                'salvage_value'         => $validated['salvage_value'] ?? 0,
                 'created_by'            => auth()->id(),
             ]);
 

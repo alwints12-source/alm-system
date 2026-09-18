@@ -30,10 +30,13 @@
                 </div>
                 <div class="fg">
                     <label>Asset type *</label>
-                    <select name="category_id" required>
+                    <select name="category_id" id="category-select" required onchange="applyCategoryDefaults()">
                         <option value="">Select type</option>
                         @foreach ($categories as $category)
-                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                            <option value="{{ $category->id }}"
+                                data-life="{{ $category->default_useful_life_yrs }}"
+                                data-rate="{{ $category->default_salvage_rate }}"
+                                {{ old('category_id') == $category->id ? 'selected' : '' }}>
                                 {{ $category->name }}
                             </option>
                         @endforeach
@@ -60,7 +63,7 @@
                 </div>
                 <div class="fg">
                     <label>Acquisition cost (₱) *</label>
-                    <input type="number" step="0.01" name="acquisition_cost" placeholder="0.00" value="{{ old('acquisition_cost') }}" required>
+                    <input type="number" step="0.01" name="acquisition_cost" id="cost-input" placeholder="0.00" value="{{ old('acquisition_cost') }}" required oninput="recalculateSalvage()">
                 </div>
                 <div class="fg">
                     <label>Status *</label>
@@ -81,9 +84,27 @@
                 </div>
             </div>
 
-            <div class="fg">
-                <label>Description / Remarks</label>
-                <textarea name="description" placeholder="Additional notes or description...">{{ old('description') }}</textarea>
+            <div style="border-top:0.5px solid #e5e9f0;margin:18px 0 16px"></div>
+            <div style="font-size:13px;font-weight:600;color:#0f2d5e;margin-bottom:12px;display:flex;align-items:center;gap:7px">
+                <i class="ti ti-chart-line" style="font-size:15px;color:#4a9eff"></i> Depreciation
+            </div>
+
+            <div class="fg2">
+                <div class="fg">
+                    <label>Useful life (years) *</label>
+                    <input type="number" name="useful_life_years" id="life-input" min="1" value="{{ old('useful_life_years') }}" required oninput="checkLifeWarning()">
+                    <div style="font-size:11px;color:#94a3b8;margin-top:4px" id="life-suggestion-note"></div>
+                </div>
+                <div class="fg">
+                    <label>Salvage value (₱)</label>
+                    <input type="number" step="0.01" name="salvage_value" id="salvage-input" min="0" value="{{ old('salvage_value', 0) }}">
+                    <div style="font-size:11px;color:#94a3b8;margin-top:4px">Suggested from category — adjust if this item differs.</div>
+                </div>
+            </div>
+
+            <div id="life-warning" style="display:none;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 11px;margin-bottom:14px;font-size:12px;color:#7a4a0a">
+                <i class="ti ti-alert-triangle" style="font-size:13px"></i>
+                <span id="life-warning-text"></span>
             </div>
 
             <div style="border-top:0.5px solid #e5e9f0;margin:18px 0 16px"></div>
@@ -115,5 +136,60 @@
             </div>
         </div>
     </form>
+
+    <script>
+        let categoryDefaultLife = null;
+
+        function applyCategoryDefaults() {
+            const select = document.getElementById('category-select');
+            const selectedOption = select.options[select.selectedIndex];
+            const life = selectedOption.getAttribute('data-life');
+
+            if (life) {
+                categoryDefaultLife = parseInt(life);
+                document.getElementById('life-input').value = categoryDefaultLife;
+                document.getElementById('life-suggestion-note').textContent = `Suggested from category: ${categoryDefaultLife} years — adjust if this item differs.`;
+            } else {
+                categoryDefaultLife = null;
+                document.getElementById('life-suggestion-note').textContent = '';
+            }
+
+            recalculateSalvage();
+            checkLifeWarning();
+        }
+
+        function recalculateSalvage() {
+            const select = document.getElementById('category-select');
+            const selectedOption = select.options[select.selectedIndex];
+            const rate = parseFloat(selectedOption.getAttribute('data-rate')) || 0;
+            const cost = parseFloat(document.getElementById('cost-input').value) || 0;
+
+            if (rate > 0 && cost > 0) {
+                document.getElementById('salvage-input').value = (cost * rate).toFixed(2);
+            }
+        }
+
+        function checkLifeWarning() {
+            const enteredLife = parseInt(document.getElementById('life-input').value);
+            const warningBox = document.getElementById('life-warning');
+            const warningText = document.getElementById('life-warning-text');
+
+            if (!categoryDefaultLife || !enteredLife) {
+                warningBox.style.display = 'none';
+                return;
+            }
+
+            // Flag if entered value is less than half or more than double
+            // the category's typical default — catches genuine outliers
+            // (a mouse under "Laptop / Desktop") without flagging normal
+            // reasonable variation
+            if (enteredLife < categoryDefaultLife / 2 || enteredLife > categoryDefaultLife * 2) {
+                warningText.textContent = `This is quite different from the ${categoryDefaultLife}-year default for this category — double-check this is intentional for this specific item.`;
+                warningBox.style.display = 'block';
+            } else {
+                warningBox.style.display = 'none';
+            }
+        }
+    </script>
 
 </x-prototype-layout>
