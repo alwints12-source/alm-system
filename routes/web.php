@@ -19,14 +19,18 @@ Route::get('/dashboard', function () {
         ->where('holder_id', auth()->id())
         ->where('status', 'pending_acknowledgement')
         ->get();
+   
+    if (auth()->user()->role === 'administrative_admin') {
+        return app(\App\Http\Controllers\AdminDashboardController::class)->index($pendingAssignments);
+    }
 
     return match (auth()->user()->role) {
-        'administrative_admin' => view('admin.dashboard', compact('pendingAssignments')),
         'technical_admin'      => view('techadmin.dashboard', compact('pendingAssignments')),
         'asset_holder'         => view('holder.dashboard', compact('pendingAssignments')),
         'technician'           => view('technician.dashboard', compact('pendingAssignments')),
         default                => view('dashboard'),
     };
+
 })->middleware(['auth'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

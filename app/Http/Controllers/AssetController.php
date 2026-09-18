@@ -109,4 +109,39 @@ class AssetController extends Controller
         return redirect()->route('admin.assets.index')
             ->with('status', 'Asset registered successfully.');
     }
+
+    /**
+     * Assign a holder to an already-registered asset that currently
+     * has none — the dashboard's "Assign holder" quick action, using
+     * the exact same assignment creation pattern as registration.
+     */
+    public function assignHolder(Request $request, Asset $asset)
+    {
+        $validated = $request->validate([
+            'holder_id' => ['required', 'exists:users,id'],
+        ]);
+
+        abort_if($asset->currentAssignment, 422, 'This asset already has an assignment in progress.');
+
+        $assignment = AssetAssignment::create([
+            'asset_id'    => $asset->id,
+            'holder_id'   => $validated['holder_id'],
+            'assigned_by' => auth()->id(),
+            'status'      => 'pending_acknowledgement',
+            'assigned_at' => now(),
+        ]);
+
+        Notification::create([
+            'recipient_id' => $validated['holder_id'],
+            'type'         => 'asset.assigned',
+            'channel'      => 'in_app',
+            'title'        => 'New asset assigned to you',
+            'body'         => "You've been assigned {$asset->name} ({$asset->asset_tag}). Please acknowledge receipt from your dashboard.",
+            'related_type' => 'asset_assignment',
+            'related_id'   => $assignment->id,
+        ]);
+
+        return redirect()->route('dashboard')
+            ->with('status', "{$asset->name} assigned successfully.");
+    }
 }

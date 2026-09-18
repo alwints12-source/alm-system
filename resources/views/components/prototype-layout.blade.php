@@ -25,9 +25,10 @@
 
             <nav>
                 <div class="sb-sect">Menu</div>
-                <div class="sb-item active">
-                    <i class="ti ti-layout-dashboard"></i><span>Dashboard</span>
-                </div>
+                    <a href="{{ route('dashboard') }}" class="sb-item active">
+                        <i class="ti ti-layout-dashboard"></i><span>Dashboard</span>
+                </a>
+               
 
                 @php
                     $role = auth()->user()->role;
