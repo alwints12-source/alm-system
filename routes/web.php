@@ -148,3 +148,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/depreciation', [DepreciationController::class, 'index'])->name('admin.depreciation.index');
     Route::get('/admin/depreciation/export', [DepreciationController::class, 'exportCsv'])->name('admin.depreciation.export');
 });
+
+use App\Http\Controllers\ReportsController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/reports', [ReportsController::class, 'index'])->name('admin.reports.index');
+    Route::get('/admin/reports/pdf', [ReportsController::class, 'exportPdf'])->name('admin.reports.pdf');
+    Route::get('/admin/reports/csv', [ReportsController::class, 'exportCsv'])->name('admin.reports.csv');
+});
