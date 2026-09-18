@@ -218,7 +218,17 @@ class WorkOrderController extends Controller
 
         $workOrder->load('asset', 'requestedBy', 'checklistItems', 'activityLog.createdBy', 'slaPolicy', 'schedule');
 
-        return view('technician.workorders.show', compact('workOrder'));
+        // Full asset history — every other completed/cancelled work
+        // order on this same asset, so the technician knows if this
+        // is a first-time issue or a recurring one before they start.
+        $assetHistory = WorkOrder::where('asset_id', $workOrder->asset_id)
+            ->where('id', '!=', $workOrder->id)
+            ->whereIn('status', ['completed', 'cancelled'])
+            ->with('assignedTo', 'requestedBy')
+            ->orderBy('reported_at', 'desc')
+            ->get();
+
+        return view('technician.workorders.show', compact('workOrder', 'assetHistory'));
     }
 
     public function toggleChecklistItem(WorkOrderChecklistItem $item)

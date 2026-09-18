@@ -135,3 +135,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/admin/disposals/{disposal}/approve', [AssetDisposalController::class, 'approve'])->name('admin.disposals.approve');
     Route::patch('/admin/disposals/{disposal}/reject', [AssetDisposalController::class, 'reject'])->name('admin.disposals.reject');
 });
+
+use App\Http\Controllers\WarrantyController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/warranty', [WarrantyController::class, 'index'])->name('admin.warranty.index');
+});

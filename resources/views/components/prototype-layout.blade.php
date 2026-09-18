@@ -39,6 +39,7 @@
                     <a href="{{ route('admin.assets.index') }}" class="sb-item"><i class="ti ti-package"></i><span>Asset Inventory</span></a>
                     <a href="{{ route('admin.requests.index') }}" class="sb-item"><i class="ti ti-send-2"></i><span>Requests</span></a>
                     <a href="{{ route('admin.asset-conditions.index') }}" class="sb-item"><i class="ti ti-activity"></i><span>Asset Conditions</span></a>
+                    <a href="{{ route('admin.warranty.index') }}" class="sb-item"><i class="ti ti-shield-check"></i><span>Warranty</span></a>
                     <a href="{{ route('admin.sla-policies.index') }}" class="sb-item"><i class="ti ti-shield-check"></i><span>SLA & Compliance</span></a>
                     <a href="{{ route('admin.maintenance-schedules.index') }}" class="sb-item"><i class="ti ti-calendar-time"></i><span>Maintenance Schedule</span></a>
                     <a href="{{ route('admin.transfers.index') }}" class="sb-item"><i class="ti ti-arrows-exchange"></i><span>Transfers</span></a>

@@ -172,6 +172,32 @@
                 </div>
             @endif
         </div>
+        
+        @if ($assetHistory->count() > 0)
+    <div class="card" style="margin-bottom:16px">
+        <div style="font-size:13px;font-weight:600;color:#0f2d5e;margin-bottom:4px">Asset history</div>
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:12px">{{ $assetHistory->count() }} previous {{ Str::plural('repair', $assetHistory->count()) }} on this asset</div>
+
+        @foreach ($assetHistory as $past)
+            <div style="border-left:2px solid #e5e9f0;padding-left:12px;padding-bottom:14px;position:relative">
+                <div style="width:7px;height:7px;border-radius:50%;background:{{ $past->status === 'completed' ? '#22c55e' : '#94a3b8' }};position:absolute;left:-4.5px;top:4px"></div>
+                <div style="font-size:11.5px;color:#94a3b8">{{ $past->reported_at->format('M j, Y') }}</div>
+                <div style="font-size:12.5px;font-weight:600;color:#334155;margin-top:2px">{{ $past->title }}</div>
+                @if ($past->status === 'completed')
+                    <div style="font-size:12px;color:#64748b;margin-top:3px">{{ $past->resolution_notes }}</div>
+                    <div style="font-size:11px;color:#94a3b8;margin-top:3px">
+                        Fixed by {{ $past->assignedTo->first_name ?? '' }} {{ $past->assignedTo->last_name ?? '' }}
+                        @if ($past->actual_cost)
+                            · ₱{{ number_format($past->actual_cost, 2) }}
+                        @endif
+                    </div>
+                @else
+                    <div style="font-size:11px;color:#94a3b8;margin-top:3px">Rejected — not actioned</div>
+                @endif
+            </div>
+        @endforeach
+    </div>
+@endif
 
         <div class="card">
             <div style="font-size:13px;font-weight:600;color:#0f2d5e;margin-bottom:12px">Activity log</div>
