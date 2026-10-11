@@ -61,9 +61,10 @@ class AssetController extends Controller
             'assign_to'             => ['nullable', 'exists:users,id'],
             'useful_life_years'     => ['required', 'integer', 'min:1'],
             'salvage_value'         => ['nullable', 'numeric', 'min:0', 'lte:acquisition_cost'],
+            'photo'                 => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
-        DB::transaction(function () use ($validated) {
+        DB::transaction(function () use ($validated, $request) {
             $nextNumber = Asset::withTrashed()->max('id') + 1;
             $assetTag = 'AST-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
 
@@ -84,6 +85,28 @@ class AssetController extends Controller
                 'salvage_value'         => $validated['salvage_value'] ?? 0,
                 'created_by'            => auth()->id(),
             ]);
+
+            if ($request->hasFile('photo')) {
+                $file = $request->file('photo');
+                $path = $file->store('assets/' . $asset->id, 'public');
+                $dimensions = @getimagesize($file->getRealPath());
+
+                \App\Models\Media::create([
+                    'mediable_type'     => 'asset',
+                    'mediable_id'       => $asset->id,
+                    's3_key'            => $path,
+                    's3_bucket'         => 'local',
+                    'original_filename' => $file->getClientOriginalName(),
+                    'mime_type'         => $file->getClientMimeType(),
+                    'file_size_bytes'   => $file->getSize(),
+                    'checksum_sha256'   => hash_file('sha256', $file->getRealPath()),
+                    'width_px'          => $dimensions[0] ?? null,
+                    'height_px'         => $dimensions[1] ?? null,
+                    'is_primary'        => true,
+                    'sort_order'        => 0,
+                    'uploaded_by'       => auth()->id(),
+                ]);
+            }
 
             if (!empty($validated['assign_to'])) {
                 $assignment = AssetAssignment::create([
@@ -144,4 +167,56 @@ class AssetController extends Controller
         return redirect()->route('dashboard')
             ->with('status', "{$asset->name} assigned successfully.");
     }
+public function uploadPhoto(Request $request, Asset $asset)
+{
+    $validated = $request->validate([
+        'photo'   => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'], // 5MB
+        'caption' => ['nullable', 'string', 'max:255'],
+    ]);
+
+    $file = $request->file('photo');
+    $path = $file->store('assets/' . $asset->id, 'public');
+
+    $dimensions = @getimagesize($file->getRealPath());
+
+    \App\Models\Media::create([
+        'mediable_type'      => 'asset',
+        'mediable_id'        => $asset->id,
+        's3_key'             => $path,
+        's3_bucket'          => 'local',
+        'original_filename'  => $file->getClientOriginalName(),
+        'mime_type'          => $file->getClientMimeType(),
+        'file_size_bytes'    => $file->getSize(),
+        'checksum_sha256'    => hash_file('sha256', $file->getRealPath()),
+        'width_px'           => $dimensions[0] ?? null,
+        'height_px'          => $dimensions[1] ?? null,
+        'is_primary'         => !$asset->media()->exists(),
+        'caption'            => $validated['caption'] ?? null,
+        'sort_order'         => $asset->media()->count(),
+        'uploaded_by'        => auth()->id(),
+    ]);
+
+    return back()->with('status', 'Photo uploaded.');
+}
+
+public function deletePhoto(\App\Models\Media $media)
+{
+    \Illuminate\Support\Facades\Storage::disk('public')->delete($media->s3_key);
+    $media->delete();
+
+    return back()->with('status', 'Photo removed.');
+}
+
+    public function show(Asset $asset)
+    {
+        $asset->load([
+            'category',
+            'location',
+            'currentAssignment.holder',
+            'media' => fn ($q) => $q->orderBy('sort_order'),
+        ]);
+
+        return view('admin.assets.show', compact('asset'));
+    }
+
 }

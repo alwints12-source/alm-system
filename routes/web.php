@@ -48,6 +48,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/assets', [AssetController::class, 'index'])->name('admin.assets.index');
     Route::get('/admin/assets/create', [AssetController::class, 'create'])->name('admin.assets.create');
     Route::post('/admin/assets', [AssetController::class, 'store'])->name('admin.assets.store');
+    Route::get('/admin/assets/{asset}', [AssetController::class, 'show'])->name('admin.assets.show');
+    Route::post('/admin/assets/{asset}/photos', [AssetController::class, 'uploadPhoto'])->name('admin.assets.uploadPhoto');
+    Route::delete('/admin/media/{media}', [AssetController::class, 'deletePhoto'])->name('admin.media.delete');
 
     Route::get('/holder/assets', [AssignmentController::class, 'index'])->name('holder.assets.index');
     Route::patch('/holder/assignments/{assignment}/acknowledge', [AssignmentController::class, 'acknowledge'])->name('holder.assignments.acknowledge');

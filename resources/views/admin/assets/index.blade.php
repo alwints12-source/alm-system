@@ -99,7 +99,7 @@
                         <td>{{ number_format($asset->acquisition_cost, 0) }}</td>
                         <td>
                             <div class="ab">
-                                <button class="ac v" disabled title="Detail view coming soon">View</button>
+                                <a href="{{ route('admin.assets.show', $asset) }}" class="ac v">View</a>
                             </div>
                         </td>
                     </tr>

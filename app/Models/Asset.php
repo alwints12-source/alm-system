@@ -176,4 +176,14 @@ class Asset extends Model
 
         return round($months * $monthlyDep, 2);
     }
+    public function media()
+   {
+    return $this->morphMany(\App\Models\Media::class, 'mediable')->orderBy('sort_order');
+   }
+
+   public function primaryPhoto()
+   {
+    return $this->morphOne(\App\Models\Media::class, 'mediable')->where('is_primary', true);
+   }
 }
+

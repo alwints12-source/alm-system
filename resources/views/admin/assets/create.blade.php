@@ -15,7 +15,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('admin.assets.store') }}">
+    <form method="POST" action="{{ route('admin.assets.store') }}" enctype="multipart/form-data">
         @csrf
 
         <div class="card">
@@ -81,6 +81,10 @@
                 <div class="fg">
                     <label>Warranty expiry</label>
                     <input type="date" name="warranty_expiry_date" value="{{ old('warranty_expiry_date') }}">
+                </div>
+                <div class="fg">
+                    <label>Photo (optional)</label>
+                    <input type="file" name="photo" accept="image/jpeg,image/png,image/webp">
                 </div>
             </div>
 
