@@ -13,6 +13,7 @@ class AssignmentController extends Controller
         $assignments = AssetAssignment::with([
             'asset.category',
             'asset.location',
+            'asset.primaryPhoto',
             'asset.workOrders' => function ($query) {
                 $query->where('status', 'completed')
                       ->with('assignedTo')
@@ -27,6 +28,25 @@ class AssignmentController extends Controller
         $allUsers = User::where('is_active', true)->orderBy('first_name')->get();
 
         return view('holder.assets.index', compact('assignments', 'allUsers'));
+    }
+
+    public function show(AssetAssignment $assignment)
+    {
+        abort_if($assignment->holder_id !== auth()->id(), 403);
+        abort_if($assignment->status !== 'acknowledged', 404);
+
+        $assignment->load([
+            'asset.category',
+            'asset.location',
+            'asset.media',
+            'asset.workOrders' => function ($query) {
+                $query->where('status', 'completed')
+                      ->with('assignedTo')
+                      ->orderBy('completed_at', 'desc');
+            },
+        ]);
+
+        return view('holder.assets.show', compact('assignment'));
     }
 
     public function acknowledge(AssetAssignment $assignment)

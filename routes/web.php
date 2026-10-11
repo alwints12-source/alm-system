@@ -53,6 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/admin/media/{media}', [AssetController::class, 'deletePhoto'])->name('admin.media.delete');
 
     Route::get('/holder/assets', [AssignmentController::class, 'index'])->name('holder.assets.index');
+    Route::get('/holder/assets/{assignment}', [AssignmentController::class, 'show'])->name('holder.assets.show');
     Route::patch('/holder/assignments/{assignment}/acknowledge', [AssignmentController::class, 'acknowledge'])->name('holder.assignments.acknowledge');
 });
 

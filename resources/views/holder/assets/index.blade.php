@@ -25,11 +25,18 @@
             @endphp
             <div class="card" style="margin-bottom:14px">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                    <div style="display:flex;align-items:center;gap:12px">
+                        @if ($asset->primaryPhoto)
+                            <img src="{{ $asset->primaryPhoto->url() }}" alt="{{ $asset->name }}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0">
+                        @else
+                            <div style="width:64px;height:64px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#94a3b8"><i class="ti ti-photo" style="font-size:22px"></i></div>
+                        @endif
                     <div>
                         <div style="font-weight:700;font-size:15px;color:#0f2d5e">{{ $asset->name }}</div>
                         <div style="font-size:12px;color:#64748b;margin-top:2px">
                             {{ $asset->asset_tag }} · {{ $asset->category->name ?? 'Uncategorised' }}
                         </div>
+                    </div>
                     </div>
                     <span class="badge b-act">Active</span>
                 </div>
@@ -82,7 +89,7 @@
                 @endif
 
                 <div style="margin-top:14px;display:flex;gap:8px">
-                    <button class="btn sm" disabled title="Coming in a later sprint">View full details</button>
+                    <a href="{{ route('holder.assets.show', $assignment) }}" class="btn sm">View full details</a>
                     <button class="btn sm" onclick="document.getElementById('modal-transfer-{{ $assignment->id }}').style.display='flex'">
                         <i class="ti ti-arrows-exchange" style="font-size:13px"></i> Request transfer
                     </button>
