@@ -26,7 +26,7 @@ Route::get('/dashboard', function () {
 
     return match (auth()->user()->role) {
         'technical_admin'      => view('techadmin.dashboard', compact('pendingAssignments')),
-        'asset_holder'         => view('holder.dashboard', compact('pendingAssignments')),
+        'asset_holder'         => app(\App\Http\Controllers\HolderDashboardController::class)->index($pendingAssignments),
         'technician'           => view('technician.dashboard', compact('pendingAssignments')),
         default                => view('dashboard'),
     };
