@@ -25,7 +25,7 @@ Route::get('/dashboard', function () {
     }
 
     return match (auth()->user()->role) {
-        'technical_admin'      => view('techadmin.dashboard', compact('pendingAssignments')),
+        'technical_admin'      => app(\App\Http\Controllers\TechAdminDashboardController::class)->index($pendingAssignments),
         'asset_holder'         => app(\App\Http\Controllers\HolderDashboardController::class)->index($pendingAssignments),
         'technician'           => app(\App\Http\Controllers\TechnicianDashboardController::class)->index($pendingAssignments),
         default                => view('dashboard'),

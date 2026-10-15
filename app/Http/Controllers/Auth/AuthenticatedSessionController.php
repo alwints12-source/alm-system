@@ -33,6 +33,8 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('mfa.challenge');
         }
 
+        $user->forceFill(['last_login_at' => now()])->save();
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));
