@@ -1,58 +1,61 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# DOST-PES Asset Lifecycle Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A web application for managing the full lifecycle of organisational assets: registration, assignment to custodians, maintenance and work orders, transfers, disposal, depreciation and reporting. Built with Laravel and PostgreSQL for DOST-PES.
 
-## About Laravel
+## Requirements
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.3 or newer, with the pdo_pgsql, mbstring, xml, gd and zip extensions
+- Composer 2
+- PostgreSQL 14 or newer (developed on PostgreSQL 18)
+- Node.js 20 or newer, with npm
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Installation
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+~~~bash
+git clone https://github.com/alwints12-source/alm-system.git
+cd alm-system
+composer install
+npm install
+npm run build
+cp .env.example .env
+php artisan key:generate
+~~~
 
-## Learning Laravel
+Create an empty PostgreSQL database named `alm_system`, then open `.env` and set `DB_USERNAME` and `DB_PASSWORD` to match your PostgreSQL account.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+~~~bash
+php artisan migrate --seed
+php artisan storage:link
+php artisan serve
+~~~
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Open http://127.0.0.1:8000 in a browser. On Windows, use the same commands in PowerShell, and copy `.env.example` to `.env` with `copy .env.example .env`.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Starting accounts
 
-## Agentic Development
+The seeder creates one account for each role. All four use the password `password`. **Change these passwords, or deactivate the accounts, before any real use.**
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+| Role | Email |
+|------|-------|
+| Administrative Admin | admin@test.com |
+| Technical Admin | techadmin@test.com |
+| Asset Holder | holder@test.com |
+| Technician | technician@test.com |
 
-```bash
-composer require laravel/boost --dev
+Self-registration is disabled. The Technical Admin creates all other accounts from the Users page.
 
-php artisan boost:install
-```
+## Roles
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+- **Administrative Admin**: registers and assigns assets, approves requests, transfers and disposals, manages SLA policies and maintenance schedules, and views reports and depreciation.
+- **Technical Admin**: creates and manages user accounts and views roles. Has no access to asset data.
+- **Technician**: works on assigned work orders and the maintenance schedule.
+- **Asset Holder**: views the assets in their custody, reports issues and requests transfers.
 
-## Contributing
+Every role can hold assets, acknowledge assignments and report issues on assets in their own custody.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Notes for deployment
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- `php artisan serve` is for development only. In production use nginx or Apache with PHP-FPM and HTTPS.
+- Set `APP_ENV=production` and `APP_DEBUG=false` in `.env`.
+- Email is set to `MAIL_MAILER=log`, so password reset links are written to `storage/logs/laravel.log` instead of being sent. Configure an SMTP service in `.env` so reset emails are delivered.
+- Uploaded asset photos are stored in `storage/app/public`. Include this folder, and the database, in backups.
