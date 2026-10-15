@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/prototype.css') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/dost-logo.png') }}">
 </head>
 <body>
     <div class="app">
@@ -16,7 +17,7 @@
         {{-- SIDEBAR --}}
         <div class="sidebar">
             <div class="sb-logo">
-                <div class="sb-logo-icon"><i class="ti ti-building-bank"></i></div>
+                <img src="{{ asset('images/dost-logo.png') }}" alt="DOST logo" style="width:44px;height:44px;flex-shrink:0;display:block">
                 <div>
                     <div class="sb-org">DOST-PES</div>
                     <div class="sb-sys">Asset Lifecycle<br>Management System</div>
