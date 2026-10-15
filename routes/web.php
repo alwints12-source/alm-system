@@ -172,3 +172,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.readAll');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
 });
+
+Route::middleware('auth')->group(function () {
+    Route::post('/admin/assets/{asset}/assign-holder', [\App\Http\Controllers\AssetController::class, 'assignHolder'])->name('admin.assets.assignHolder');
+});
