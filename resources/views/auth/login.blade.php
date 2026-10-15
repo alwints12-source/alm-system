@@ -8,13 +8,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/prototype.css') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/dost-logo.png') }}">
 </head>
 <body>
 
 <div class="login-wrap">
     <div class="login-card">
         <div class="login-head">
-            <div class="login-icon"><i class="ti ti-building-bank"></i></div>
+            <img src="{{ asset('images/dost-logo.png') }}" alt="DOST logo" style="width:84px;height:84px;display:block;margin:0 auto 12px">
             <div class="login-title">Asset Lifecycle Management System</div>
             <div class="login-sub">Department of Science and Technology — PES</div>
             <div class="login-divider"></div>
