@@ -48,8 +48,79 @@
         </div>
     @endif
 
-    <div class="card">
-        Welcome, {{ auth()->user()->name }}. This is the Asset Holder dashboard.
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px">
+        <div class="card">
+            <div style="font-size:12px;color:#64748b;margin-bottom:6px"><i class="ti ti-package" style="font-size:13px"></i> My assets</div>
+            <div style="font-size:26px;font-weight:700;color:#0f2d5e">{{ $myAssets->count() }}</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:4px">Confirmed in your custody</div>
+        </div>
+        <div class="card">
+            <div style="font-size:12px;color:#64748b;margin-bottom:6px"><i class="ti ti-clipboard-check" style="font-size:13px"></i> Awaiting acknowledgement</div>
+            <div style="font-size:26px;font-weight:700;color:#7a4a0a">{{ $pendingAssignments->count() }}</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:4px">Assets to confirm receipt of</div>
+        </div>
+        <div class="card">
+            <div style="font-size:12px;color:#64748b;margin-bottom:6px"><i class="ti ti-tool" style="font-size:13px"></i> Open requests</div>
+            <div style="font-size:26px;font-weight:700;color:#185fa5">{{ $openRequests }}</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:4px">Issues being handled</div>
+        </div>
     </div>
+
+    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:18px">
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+<div style="font-size:14px;font-weight:700;color:#0f2d5e">Recent requests</div>
+<a href="{{ url('/holder/requests') }}" style="font-size:12px;color:#185fa5">View all</a>
+</div>
+@forelse ($recentRequests as $wo)
+<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:0.5px solid #e5e9f0">
+<div>
+<div style="font-size:13px;font-weight:600;color:#0f2d5e">{{ $wo->asset->name ?? 'Asset' }}</div>
+<div style="font-size:11.5px;color:#64748b">{{ $wo->work_order_number ?? ('#'.$wo->id) }} · {{ \Carbon\Carbon::parse($wo->reported_at ?? $wo->created_at)->format('M j, Y') }}</div>
+</div>
+<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#f1f5f9;color:#334155">{{ ucfirst(str_replace('_',' ',$wo->status)) }}</span>
+</div>
+@empty
+<div style="text-align:center;color:#94a3b8;padding:20px;font-size:12.5px">No requests yet.</div>
+@endforelse
+</div>
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+<div style="font-size:14px;font-weight:700;color:#0f2d5e">Latest notifications</div>
+<a href="{{ route('notifications.index') }}" style="font-size:12px;color:#185fa5">View all</a>
+</div>
+@forelse ($recentNotifications as $n)
+<div style="padding:9px 0 9px 9px;border-top:0.5px solid #e5e9f0;{{ $n->is_read ? '' : 'border-left:3px solid #185fa5;' }}">
+<div style="font-size:13px;font-weight:600;color:#0f2d5e">{{ $n->title ?? 'Notification' }}</div>
+<div style="font-size:11.5px;color:#64748b">{{ \Illuminate\Support\Str::limit($n->body ?? $n->message ?? '', 70) }}</div>
+<div style="font-size:11px;color:#94a3b8;margin-top:2px">{{ $n->created_at->diffForHumans() }}</div>
+</div>
+@empty
+<div style="text-align:center;color:#94a3b8;padding:20px;font-size:12.5px">No notifications.</div>
+@endforelse
+</div>
+</div>
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+<div style="font-size:14px;font-weight:700;color:#0f2d5e">My assets</div>
+<a href="{{ url('/holder/assets') }}" style="font-size:12px;color:#185fa5">View all</a>
+</div>
+@forelse ($myAssets as $assignment)
+<a href="{{ route('holder.assets.show', $assignment) }}" style="display:flex;align-items:center;gap:12px;padding:9px 0;border-top:0.5px solid #e5e9f0;text-decoration:none">
+@if ($assignment->asset->primaryPhoto)
+<img src="{{ $assignment->asset->primaryPhoto->url() }}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;flex-shrink:0">
+@else
+<div style="width:40px;height:40px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#94a3b8;flex-shrink:0"><i class="ti ti-photo"></i></div>
+@endif
+<div>
+<div style="font-size:13px;font-weight:600;color:#0f2d5e">{{ $assignment->asset->name }}</div>
+<div style="font-size:11.5px;color:#64748b">{{ $assignment->asset->asset_tag }} · {{ $assignment->asset->category->name ?? 'Uncategorised' }}</div>
+</div>
+</a>
+@empty
+<div style="text-align:center;color:#94a3b8;padding:20px;font-size:12.5px">No assets acknowledged yet.</div>
+@endforelse
+</div>
+
 
 </x-prototype-layout>
