@@ -84,7 +84,7 @@ class WorkOrderController extends Controller
     public function index()
     {
         $requests = WorkOrder::with('asset.category', 'requestedBy', 'assignedTo', 'slaPolicy')
-            ->orderBy('reported_at', 'desc')
+            ->orderByRaw('COALESCE(reported_at, created_at) DESC')
             ->get();
 
         $technicians = User::where('role', 'technician')
@@ -206,7 +206,7 @@ class WorkOrderController extends Controller
     {
         $workOrders = WorkOrder::with('asset', 'requestedBy', 'slaPolicy')
             ->where('assigned_to', auth()->id())
-            ->orderBy('due_date')
+            ->orderByRaw('COALESCE(reported_at, created_at) DESC')
             ->get();
 
         return view('technician.workorders.index', compact('workOrders'));
