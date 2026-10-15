@@ -2,7 +2,7 @@
 
     <div class="ph">
         <div class="ph-l">
-            <div class="bc">Asset Holder</div>
+            <div class="bc">My workspace</div>
             <div class="pt">My assets</div>
         </div>
     </div>

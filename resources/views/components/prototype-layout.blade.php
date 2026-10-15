@@ -47,10 +47,14 @@
                     <a href="{{ route('admin.disposals.index') }}" class="sb-item"><i class="ti ti-trash"></i><span>Disposal</span></a>
                     <a href="{{ route('admin.depreciation.index') }}" class="sb-item"><i class="ti ti-chart-line"></i><span>Depreciation</span></a>
                     <a href="{{ route('admin.reports.index') }}" class="sb-item"><i class="ti ti-chart-bar"></i><span>Reports</span></a>
+                    <a href="{{ route('holder.assets.index') }}" class="sb-item"><i class="ti ti-package"></i><span>My Assets</span></a>
+                    <a href="{{ route('holder.requests.index') }}" class="sb-item"><i class="ti ti-clipboard-list"></i><span>My Requests</span></a>
                 @elseif($role === 'technical_admin')
                     {{-- Tech Admin manages system users and roles --}}
                     <a href="{{ route('techadmin.users.index') }}" class="sb-item"><i class="ti ti-users"></i><span>Users</span></a>
-                    <div class="sb-item"><i class="ti ti-shield-lock"></i><span>Roles</span></div>
+                    <a href="{{ route('techadmin.roles.index') }}" class="sb-item"><i class="ti ti-shield-lock"></i><span>Roles</span></a>
+                    <a href="{{ route('holder.assets.index') }}" class="sb-item"><i class="ti ti-package"></i><span>My Assets</span></a>
+                    <a href="{{ route('holder.requests.index') }}" class="sb-item"><i class="ti ti-clipboard-list"></i><span>My Requests</span></a>
                 @elseif($role === 'asset_holder')
                     <a href="{{ route('holder.assets.index') }}" class="sb-item"><i class="ti ti-package"></i><span>My Assets</span></a>
                     <a href="{{ route('holder.requests.index') }}" class="sb-item"><i class="ti ti-clipboard-list"></i><span>Requests</span></a>
@@ -87,17 +91,28 @@
         <div class="main">
             <div class="topbar">
                 <div class="topbar-title">{{ $title ?? 'Dashboard' }}</div>
-                <div class="srch">
+                <form method="GET" action="{{ url('/search') }}" class="srch">
                     <i class="ti ti-search" style="font-size:13px;color:#9aa3b2"></i>
-                    <input type="text" placeholder="Search assets, users...">
-                </div>
+                    <input type="text" name="q" value="{{ request('q') }}" placeholder="{{ $role === 'administrative_admin' ? 'Search assets, requests, users...' : ($role === 'technical_admin' ? 'Search users...' : 'Search my assets and requests...') }}">
+                </form>
                 <a href="{{ route('notifications.index') }}" class="ic-btn" aria-label="Notifications" style="position:relative;text-decoration:none">
                     <i class="ti ti-bell" style="font-size:15px"></i>
                     @if ($unreadCount > 0)<span style="position:absolute;top:-4px;right:-4px;background:#dc2626;color:#fff;font-size:9px;font-weight:700;min-width:15px;height:15px;line-height:15px;text-align:center;border-radius:8px">{{ $unreadCount }}</span>@endif
                 </a>
-                <button class="ic-btn" aria-label="Profile">
-                    <i class="ti ti-user" style="font-size:15px"></i>
-                </button>
+                <div id="profile-wrap" style="position:relative">
+                    <button type="button" class="ic-btn" aria-label="Profile" onclick="var m=document.getElementById('profile-menu');m.style.display=m.style.display==='block'?'none':'block'">
+                        <i class="ti ti-user" style="font-size:15px"></i>
+                    </button>
+                    <div id="profile-menu" style="display:none;position:absolute;right:0;top:42px;width:220px;background:#fff;border:1px solid #e5e9f0;border-radius:10px;box-shadow:0 8px 24px rgba(15,45,94,.12);z-index:50;padding:6px">
+                        <div style="padding:8px 10px 10px;border-bottom:1px solid #eef1f6;margin-bottom:4px">
+                            <div style="font-size:13px;font-weight:700;color:#0f2d5e">{{ auth()->user()->name }}</div>
+                            <div style="font-size:11.5px;color:#64748b">{{ \Illuminate\Support\Str::headline(auth()->user()->role) }}</div>
+                        </div>
+                        <a href="{{ route('profile.edit') }}" style="display:block;padding:8px 10px;font-size:12.5px;color:#334155;text-decoration:none;border-radius:6px">Profile</a>
+                        <a href="{{ url('/settings/mfa') }}" style="display:block;padding:8px 10px;font-size:12.5px;color:#334155;text-decoration:none;border-radius:6px">Security (MFA)</a>
+                        <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit" style="width:100%;text-align:left;background:none;border:none;padding:8px 10px;font-size:12.5px;color:#b91c1c;cursor:pointer;border-radius:6px">Sign out</button></form>
+                    </div>
+                </div>
             </div>
 
             <div class="content">
@@ -106,5 +121,6 @@
         </div>
 
     </div>
+<script>document.addEventListener('click',function(e){if(!e.target.closest('#profile-wrap')){var m=document.getElementById('profile-menu');if(m){m.style.display='none';}}});</script>
 </body>
 </html>
