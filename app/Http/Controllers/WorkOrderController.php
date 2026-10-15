@@ -63,15 +63,37 @@ class WorkOrderController extends Controller
 
         $this->logActivity($workOrder, 'Issue reported by ' . auth()->user()->name);
 
+        $this->notifyAdmins($workOrder, 'work_order.reported', 'New maintenance request', "{$workOrder->title} was reported by " . auth()->user()->name . ' for ' . $assignment->asset->asset_tag . '.', auth()->id());
+
         return redirect()->route('holder.assets.index')
             ->with('status', 'Issue reported. Admin will review and assign a technician.');
+    }
+
+    private function notifyAdmins(WorkOrder $workOrder, string $type, string $title, string $body, ?int $exceptUserId = null): void
+    {
+        \App\Models\User::where('role', 'administrative_admin')
+            ->where('is_active', true)
+            ->when($exceptUserId, fn ($q) => $q->where('id', '!=', $exceptUserId))
+            ->get()
+            ->each(function ($admin) use ($workOrder, $type, $title, $body) {
+                Notification::create([
+                    'recipient_id' => $admin->id,
+                    'type'         => $type,
+                    'channel'      => 'in_app',
+                    'title'        => $title,
+                    'body'         => $body,
+                    'related_type' => 'work_order',
+                    'related_id'   => $workOrder->id,
+                ]);
+            });
     }
 
     public function myRequests()
     {
         $requests = WorkOrder::with('asset', 'assignedTo')
             ->where('requested_by', auth()->id())
-            ->orderBy('reported_at', 'desc')
+            ->whereNull('schedule_id')
+            ->orderByRaw('COALESCE(reported_at, created_at) DESC')
             ->get();
 
         return view('holder.requests.index', compact('requests'));
@@ -355,6 +377,8 @@ class WorkOrderController extends Controller
                 'related_type' => 'work_order',
                 'related_id'   => $workOrder->id,
             ]);
+
+            $this->notifyAdmins($workOrder, 'work_order.completed', 'Work order completed', "{$workOrder->title} was completed by " . auth()->user()->name . '.', $workOrder->requested_by);
         });
 
         return redirect()->route('technician.workorders.index')
