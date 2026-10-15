@@ -30,6 +30,11 @@
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
         </select>
+        <select id="mfa-filter" onchange="filterUsers()">
+            <option value="">All MFA</option>
+            <option value="on">MFA on</option>
+            <option value="off">MFA off</option>
+        </select>
     </div>
 
     <div class="tw">
@@ -41,6 +46,7 @@
                     <th style="width:130px">Role</th>
                     <th style="width:120px">Department</th>
                     <th style="width:80px">Status</th>
+                    <th style="width:70px">MFA</th>
                     <th style="width:110px">Actions</th>
                 </tr>
             </thead>
@@ -57,7 +63,7 @@
                         $roleLabel = \Illuminate\Support\Str::headline($user->role);
                         $initials = strtoupper(substr($user->first_name, 0, 1) . substr($user->last_name, 0, 1));
                     @endphp
-                    <tr data-role="{{ $user->role }}" data-status="{{ $user->is_active ? 'active' : 'inactive' }}" data-search="{{ strtolower($user->first_name . ' ' . $user->last_name . ' ' . $user->email) }}">
+                    <tr data-role="{{ $user->role }}" data-status="{{ $user->is_active ? 'active' : 'inactive' }}" data-mfa="{{ $user->mfa_enabled ? 'on' : 'off' }}" data-search="{{ strtolower($user->first_name . ' ' . $user->last_name . ' ' . $user->email) }}">
                         <td>
                             <div style="display:flex;align-items:center;gap:7px">
                                 <div class="ava ava-sm">{{ $initials }}</div>
@@ -74,6 +80,7 @@
                                 <span class="badge b-canc">Inactive</span>
                             @endif
                         </td>
+                        <td>{!! $user->mfa_enabled ? '<span class="badge b-act">On</span>' : '<span style="color:#94a3b8;font-size:12px">Off</span>' !!}</td>
                         <td>
                             <div class="ab">
                                 <form method="POST" action="{{ route('techadmin.users.toggle', $user) }}" style="display:inline">
@@ -173,15 +180,24 @@
             const search = document.getElementById('user-search').value.toLowerCase();
             const role = document.getElementById('role-filter').value;
             const status = document.getElementById('status-filter').value;
+            const mfa = document.getElementById('mfa-filter').value;
             const rows = document.querySelectorAll('#users-table-body tr');
 
             rows.forEach(row => {
                 const matchesSearch = row.dataset.search.includes(search);
                 const matchesRole = !role || row.dataset.role === role;
                 const matchesStatus = !status || row.dataset.status === status;
-                row.style.display = (matchesSearch && matchesRole && matchesStatus) ? '' : 'none';
+                const matchesMfa = !mfa || row.dataset.mfa === mfa;
+                row.style.display = (matchesSearch && matchesRole && matchesStatus && matchesMfa) ? '' : 'none';
             });
         }
+
+        const params = new URLSearchParams(window.location.search);
+        ['role', 'status', 'mfa'].forEach(k => {
+            const el = document.getElementById(k + '-filter');
+            if (el && params.get(k)) { el.value = params.get(k); }
+        });
+        filterUsers();
 
         @if ($errors->any())
             document.getElementById('modal-adduser').style.display = 'flex';

@@ -11,26 +11,26 @@
 @endif
 @include('partials.pending-assignments-banner')
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px">
-<div class="card">
+<a href="{{ url('/techadmin/users') }}" class="card" style="text-decoration:none;display:block">
 <div style="font-size:12px;color:#64748b;margin-bottom:6px"><i class="ti ti-users" style="font-size:13px"></i> Total users</div>
 <div style="font-size:26px;font-weight:700;color:#0f2d5e">{{ $total }}</div>
 <div style="font-size:11px;color:#94a3b8;margin-top:4px">All accounts</div>
-</div>
-<div class="card">
+</a>
+<a href="{{ url('/techadmin/users?status=active') }}" class="card" style="text-decoration:none;display:block">
 <div style="font-size:12px;color:#64748b;margin-bottom:6px"><i class="ti ti-user-check" style="font-size:13px"></i> Active users</div>
 <div style="font-size:26px;font-weight:700;color:#2d7d32">{{ $active }}</div>
 <div style="font-size:11px;color:#94a3b8;margin-top:4px">Can sign in</div>
-</div>
-<div class="card">
+</a>
+<a href="{{ url('/techadmin/users?status=inactive') }}" class="card" style="text-decoration:none;display:block">
 <div style="font-size:12px;color:#64748b;margin-bottom:6px"><i class="ti ti-user-off" style="font-size:13px"></i> Inactive users</div>
 <div style="font-size:26px;font-weight:700;color:#7a4a0a">{{ $inactive }}</div>
 <div style="font-size:11px;color:#94a3b8;margin-top:4px">Deactivated accounts</div>
-</div>
-<div class="card">
+</a>
+<a href="{{ url('/techadmin/users?mfa=on') }}" class="card" style="text-decoration:none;display:block">
 <div style="font-size:12px;color:#64748b;margin-bottom:6px"><i class="ti ti-shield-lock" style="font-size:13px"></i> MFA enabled</div>
 <div style="font-size:26px;font-weight:700;color:#185fa5">{{ $mfa }}</div>
 <div style="font-size:11px;color:#94a3b8;margin-top:4px">{{ $mfaPct }}% of users</div>
-</div>
+</a>
 </div>
 @php
 $roleLabels = ['administrative_admin' => 'Administrative Admin', 'technical_admin' => 'Technical Admin', 'technician' => 'Technician', 'asset_holder' => 'Asset Holder'];
