@@ -4,7 +4,7 @@
 
     <div class="ph">
         <div class="ph-l">
-            <div class="bc">Asset Holder</div>
+            <div class="bc">My workspace</div>
             <div class="pt">{{ $asset->name }}</div>
         </div>
         <a href="{{ route('holder.assets.index') }}" class="btn sm" style="background:#f1f5f9;color:#334155">

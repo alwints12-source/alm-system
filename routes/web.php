@@ -8,6 +8,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/techadmin/users', [UserController::class, 'index'])->name('techadmin.users.index');
     Route::post('/techadmin/users', [UserController::class, 'store'])->name('techadmin.users.store');
     Route::patch('/techadmin/users/{user}/toggle', [UserController::class, 'toggleStatus'])->name('techadmin.users.toggle');
+    Route::get('/techadmin/roles', [\App\Http\Controllers\RoleController::class, 'index'])->name('techadmin.roles.index');
 });
 
 Route::get('/', function () {
@@ -176,3 +177,5 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/admin/assets/{asset}/assign-holder', [\App\Http\Controllers\AssetController::class, 'assignHolder'])->name('admin.assets.assignHolder');
 });
+
+Route::get('/search', [\App\Http\Controllers\SearchController::class, 'index'])->middleware('auth')->name('search');

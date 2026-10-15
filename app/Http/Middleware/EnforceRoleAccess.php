@@ -13,7 +13,7 @@ class EnforceRoleAccess
         'admin'      => ['administrative_admin'],
         'techadmin'  => ['technical_admin'],
         'technician' => ['technician'],
-        'holder'     => ['asset_holder', 'technician'],
+        'holder'               => ['administrative_admin', 'technical_admin', 'asset_holder', 'technician'],
     ];
 
     public function handle(Request $request, Closure $next): Response
