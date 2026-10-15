@@ -61,7 +61,8 @@
                 @endif
 
                 <div class="sb-sect">General</div>
-                <div class="sb-item"><i class="ti ti-bell"></i><span>Notifications</span></div>
+                @php $unreadCount = \App\Models\Notification::where('recipient_id', auth()->id())->where('is_read', false)->count(); @endphp
+                <a href="{{ route('notifications.index') }}" class="sb-item"><i class="ti ti-bell"></i><span>Notifications</span>@if ($unreadCount > 0)<span style="margin-left:auto;background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px">{{ $unreadCount }}</span>@endif</a>
                 <a href="{{ route('settings.mfa') }}" class="sb-item"><i class="ti ti-settings"></i><span>Settings</span></a>
             </nav>
 
@@ -90,9 +91,10 @@
                     <i class="ti ti-search" style="font-size:13px;color:#9aa3b2"></i>
                     <input type="text" placeholder="Search assets, users...">
                 </div>
-                <button class="ic-btn" aria-label="Notifications">
+                <a href="{{ route('notifications.index') }}" class="ic-btn" aria-label="Notifications" style="position:relative;text-decoration:none">
                     <i class="ti ti-bell" style="font-size:15px"></i>
-                </button>
+                    @if ($unreadCount > 0)<span style="position:absolute;top:-4px;right:-4px;background:#dc2626;color:#fff;font-size:9px;font-weight:700;min-width:15px;height:15px;line-height:15px;text-align:center;border-radius:8px">{{ $unreadCount }}</span>@endif
+                </a>
                 <button class="ic-btn" aria-label="Profile">
                     <i class="ti ti-user" style="font-size:15px"></i>
                 </button>

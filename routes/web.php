@@ -164,3 +164,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/reports/pdf', [ReportsController::class, 'exportPdf'])->name('admin.reports.pdf');
     Route::get('/admin/reports/csv', [ReportsController::class, 'exportCsv'])->name('admin.reports.csv');
 });
+
+use App\Http\Controllers\NotificationController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.readAll');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+});
