@@ -69,7 +69,16 @@
                     @endphp
                     <tr data-status="{{ $asset->status }}" data-assigned="{{ $isAssigned ? 'assigned' : 'unassigned' }}" data-search="{{ strtolower($asset->name . ' ' . $asset->asset_tag . ' ' . $asset->serial_number) }}">
                         <td>{{ $asset->asset_tag }}</td>
-                        <td>{{ $asset->name }}</td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:8px">
+                                @if ($asset->primaryPhoto)
+                                    <img src="{{ $asset->primaryPhoto->url() }}" alt="" style="flex-shrink:0;width:32px;height:32px;object-fit:cover;border-radius:6px;border:1px solid #e2e8f0">
+                                @else
+                                    <div style="flex-shrink:0;width:32px;height:32px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#94a3b8"><i class="ti ti-photo" style="font-size:14px"></i></div>
+                                @endif
+                                <span>{{ $asset->name }}</span>
+                            </div>
+                        </td>
                         <td>{{ $asset->category->name ?? '—' }}</td>
                         <td>{{ $asset->location->name ?? '—' }}</td>
                         <td>

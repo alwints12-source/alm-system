@@ -18,7 +18,7 @@ class AssetController extends Controller
      */
     public function index()
     {
-        $assets = Asset::with(['category', 'location', 'currentAssignment.holder'])
+        $assets = Asset::with(['category', 'location', 'currentAssignment.holder', 'primaryPhoto'])
             ->orderBy('created_at', 'desc')
             ->get();
 
