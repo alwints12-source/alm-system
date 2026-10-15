@@ -61,6 +61,8 @@ class MfaLoginController extends Controller
         Auth::loginUsingId($user->id, $remember);
         $request->session()->regenerate();
 
+        $user->forceFill(['last_login_at' => now()])->save();
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 }
