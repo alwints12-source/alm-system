@@ -216,7 +216,7 @@ class WorkOrderController extends Controller
     {
         abort_if($workOrder->assigned_to !== auth()->id(), 403);
 
-        $workOrder->load('asset', 'requestedBy', 'checklistItems', 'activityLog.createdBy', 'slaPolicy', 'schedule');
+        $workOrder->load('asset.primaryPhoto', 'requestedBy', 'checklistItems', 'activityLog.createdBy', 'slaPolicy', 'schedule');
 
         // Full asset history — every other completed/cancelled work
         // order on this same asset, so the technician knows if this

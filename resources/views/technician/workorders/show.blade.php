@@ -33,7 +33,14 @@
                 <div class="fg2">
                     <div>
                         <div style="font-size:10.5px;color:#94a3b8;text-transform:uppercase;font-weight:600;margin-bottom:2px">Asset</div>
-                        <div style="font-size:13px">{{ $workOrder->asset->asset_tag }} — {{ $workOrder->asset->name }}</div>
+                        <div style="display:flex;align-items:center;gap:10px">
+                            @if ($workOrder->asset->primaryPhoto)
+                                <img src="{{ $workOrder->asset->primaryPhoto->url() }}" alt="{{ $workOrder->asset->name }}" style="flex-shrink:0;width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0">
+                            @else
+                                <div style="flex-shrink:0;width:56px;height:56px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#94a3b8"><i class="ti ti-photo" style="font-size:20px"></i></div>
+                            @endif
+                            <div style="font-size:13px">{{ $workOrder->asset->asset_tag }} — {{ $workOrder->asset->name }}</div>
+                        </div>
                     </div>
                     <div>
                         <div style="font-size:10.5px;color:#94a3b8;text-transform:uppercase;font-weight:600;margin-bottom:2px">Reported by</div>
