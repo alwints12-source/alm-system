@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asset;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class DepreciationController extends Controller
 {
@@ -77,5 +78,30 @@ class DepreciationController extends Controller
         return response()->streamDownload($callback, $filename, [
             'Content-Type' => 'text/csv',
         ]);
+    }
+
+    public function exportPdf()
+    {
+        $assets = Asset::where('status', '!=', 'disposed')
+            ->whereNotNull('useful_life_years')
+            ->with('category', 'location')
+            ->orderBy('asset_tag')
+            ->get();
+
+        $totalAcquisitionValue = $assets->sum('acquisition_cost');
+        $currentBookValue = $assets->sum(fn ($a) => $a->currentBookValue());
+        $ytdDepreciation = $assets->sum(fn ($a) => $a->depreciationInYear((int) now()->year));
+        $fullyDepreciatedCount = $assets->filter(fn ($a) => $a->isFullyDepreciated())->count();
+
+        $byDepartment = $assets->groupBy(fn ($a) => $a->location->name ?? 'Unassigned')
+            ->map(fn ($group) => $group->sum(fn ($a) => $a->accumulatedDepreciation()))
+            ->sortDesc();
+
+        $pdf = Pdf::loadView('admin.depreciation.pdf', compact(
+            'assets', 'totalAcquisitionValue', 'currentBookValue', 'ytdDepreciation',
+            'fullyDepreciatedCount', 'byDepartment'
+        ))->setPaper('a4', 'landscape');
+
+        return $pdf->download('depreciation-' . now()->format('Y-m-d') . '.pdf');
     }
 }
