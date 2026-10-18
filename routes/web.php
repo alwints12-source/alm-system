@@ -88,6 +88,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings/mfa', [MfaController::class, 'show'])->name('settings.mfa');
     Route::post('/settings/mfa/enable', [MfaController::class, 'enable'])->name('settings.mfa.enable');
     Route::delete('/settings/mfa/disable', [MfaController::class, 'disable'])->name('settings.mfa.disable');
+    Route::get('/settings', fn () => redirect()->route('settings.profile'))->name('settings.index');
+    Route::get('/settings/profile', [\App\Http\Controllers\SettingsController::class, 'profile'])->name('settings.profile');
+    Route::patch('/settings/profile', [\App\Http\Controllers\SettingsController::class, 'updateProfile'])->name('settings.profile.update');
+    Route::get('/settings/password', [\App\Http\Controllers\SettingsController::class, 'password'])->name('settings.password');
 });
 
 use App\Http\Controllers\Auth\MfaLoginController;
