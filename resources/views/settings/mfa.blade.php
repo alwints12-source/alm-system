@@ -7,6 +7,8 @@
         </div>
     </div>
 
+    @include('settings._tabs', ['active' => 'security'])
+
     @if (session('status'))
         <div style="background:#f0fdf4;border:1px solid #c0dd97;color:#2d7d32;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12.5px">
             {{ session('status') }}

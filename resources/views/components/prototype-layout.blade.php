@@ -83,7 +83,7 @@
                 <div class="sb-sect">General</div>
                 @php $unreadCount = \App\Models\Notification::where('recipient_id', auth()->id())->where('is_read', false)->count(); @endphp
                 <a href="{{ route('notifications.index') }}" class="sb-item {{ $on('notifications.index') }}"><i class="ti ti-bell"></i><span>Notifications</span>@if ($unreadCount > 0)<span style="margin-left:auto;background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px">{{ $unreadCount }}</span>@endif</a>
-                <a href="{{ route('settings.mfa') }}" class="sb-item {{ $on('settings.mfa') }}"><i class="ti ti-settings"></i><span>Settings</span></a>
+                <a href="{{ route('settings.profile') }}" class="sb-item {{ request()->routeIs('settings.*') ? 'active' : '' }}"><i class="ti ti-settings"></i><span>Settings</span></a>
             </nav>
 
             <div class="sb-footer">
