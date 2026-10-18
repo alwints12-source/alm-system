@@ -23,6 +23,7 @@ class User extends Authenticatable
         'mfa_secret',
         'mfa_enabled',
         'mfa_confirmed_at',
+        'is_active',
     ];
 
     protected $hidden = [
