@@ -26,7 +26,22 @@
 
             <nav>
                 <div class="sb-sect">Menu</div>
-                    <a href="{{ route('dashboard') }}" class="sb-item active">
+                    @php
+                    // Highlights the menu item that matches the current page.
+                    $on = function (string $name, array $except = []) {
+                        $pattern = preg_replace('/\.index$/', '.*', $name);
+                        if (! request()->routeIs($pattern)) {
+                            return '';
+                        }
+                        foreach ($except as $route) {
+                            if (request()->routeIs($route)) {
+                                return '';
+                            }
+                        }
+                        return 'active';
+                    };
+                @endphp
+                <a href="{{ route('dashboard') }}" class="sb-item {{ $on('dashboard') }}">
                         <i class="ti ti-layout-dashboard"></i><span>Dashboard</span>
                 </a>
                
@@ -37,38 +52,38 @@
 
                 @if($role === 'administrative_admin')
                     {{-- Admin manages the asset lifecycle: register, inventory, transfers, disposal, reports --}}
-                    <a href="{{ route('admin.assets.create') }}" class="sb-item"><i class="ti ti-plus"></i><span>Register Asset</span></a>
-                    <a href="{{ route('admin.assets.index') }}" class="sb-item"><i class="ti ti-package"></i><span>Asset Inventory</span></a>
-                    <a href="{{ route('admin.requests.index') }}" class="sb-item"><i class="ti ti-send-2"></i><span>Requests</span></a>
-                    <a href="{{ route('admin.asset-conditions.index') }}" class="sb-item"><i class="ti ti-activity"></i><span>Asset Conditions</span></a>
-                    <a href="{{ route('admin.warranty.index') }}" class="sb-item"><i class="ti ti-shield-check"></i><span>Warranty</span></a>
-                    <a href="{{ route('admin.sla-policies.index') }}" class="sb-item"><i class="ti ti-shield-check"></i><span>SLA & Compliance</span></a>
-                    <a href="{{ route('admin.maintenance-schedules.index') }}" class="sb-item"><i class="ti ti-calendar-time"></i><span>Maintenance Schedule</span></a>
-                    <a href="{{ route('admin.transfers.index') }}" class="sb-item"><i class="ti ti-arrows-exchange"></i><span>Transfers</span></a>
-                    <a href="{{ route('admin.disposals.index') }}" class="sb-item"><i class="ti ti-trash"></i><span>Disposal</span></a>
-                    <a href="{{ route('admin.depreciation.index') }}" class="sb-item"><i class="ti ti-chart-line"></i><span>Depreciation</span></a>
-                    <a href="{{ route('admin.reports.index') }}" class="sb-item"><i class="ti ti-chart-bar"></i><span>Reports</span></a>
-                    <a href="{{ route('holder.assets.index') }}" class="sb-item"><i class="ti ti-package"></i><span>My Assets</span></a>
-                    <a href="{{ route('holder.requests.index') }}" class="sb-item"><i class="ti ti-clipboard-list"></i><span>My Requests</span></a>
+                    <a href="{{ route('admin.assets.create') }}" class="sb-item {{ $on('admin.assets.create') }}"><i class="ti ti-plus"></i><span>Register Asset</span></a>
+                    <a href="{{ route('admin.assets.index') }}" class="sb-item {{ $on('admin.assets.index', ['admin.assets.create']) }}"><i class="ti ti-package"></i><span>Asset Inventory</span></a>
+                    <a href="{{ route('admin.requests.index') }}" class="sb-item {{ $on('admin.requests.index') }}"><i class="ti ti-send-2"></i><span>Requests</span></a>
+                    <a href="{{ route('admin.asset-conditions.index') }}" class="sb-item {{ $on('admin.asset-conditions.index') }}"><i class="ti ti-activity"></i><span>Asset Conditions</span></a>
+                    <a href="{{ route('admin.warranty.index') }}" class="sb-item {{ $on('admin.warranty.index') }}"><i class="ti ti-shield-check"></i><span>Warranty</span></a>
+                    <a href="{{ route('admin.sla-policies.index') }}" class="sb-item {{ $on('admin.sla-policies.index') }}"><i class="ti ti-shield-check"></i><span>SLA & Compliance</span></a>
+                    <a href="{{ route('admin.maintenance-schedules.index') }}" class="sb-item {{ $on('admin.maintenance-schedules.index') }}"><i class="ti ti-calendar-time"></i><span>Maintenance Schedule</span></a>
+                    <a href="{{ route('admin.transfers.index') }}" class="sb-item {{ $on('admin.transfers.index') }}"><i class="ti ti-arrows-exchange"></i><span>Transfers</span></a>
+                    <a href="{{ route('admin.disposals.index') }}" class="sb-item {{ $on('admin.disposals.index') }}"><i class="ti ti-trash"></i><span>Disposal</span></a>
+                    <a href="{{ route('admin.depreciation.index') }}" class="sb-item {{ $on('admin.depreciation.index') }}"><i class="ti ti-chart-line"></i><span>Depreciation</span></a>
+                    <a href="{{ route('admin.reports.index') }}" class="sb-item {{ $on('admin.reports.index') }}"><i class="ti ti-chart-bar"></i><span>Reports</span></a>
+                    <a href="{{ route('holder.assets.index') }}" class="sb-item {{ $on('holder.assets.index') }}"><i class="ti ti-package"></i><span>My Assets</span></a>
+                    <a href="{{ route('holder.requests.index') }}" class="sb-item {{ $on('holder.requests.index') }}"><i class="ti ti-clipboard-list"></i><span>My Requests</span></a>
                 @elseif($role === 'technical_admin')
                     {{-- Tech Admin manages system users and roles --}}
-                    <a href="{{ route('techadmin.users.index') }}" class="sb-item"><i class="ti ti-users"></i><span>Users</span></a>
-                    <a href="{{ route('techadmin.roles.index') }}" class="sb-item"><i class="ti ti-shield-lock"></i><span>Roles</span></a>
-                    <a href="{{ route('holder.assets.index') }}" class="sb-item"><i class="ti ti-package"></i><span>My Assets</span></a>
-                    <a href="{{ route('holder.requests.index') }}" class="sb-item"><i class="ti ti-clipboard-list"></i><span>My Requests</span></a>
+                    <a href="{{ route('techadmin.users.index') }}" class="sb-item {{ $on('techadmin.users.index') }}"><i class="ti ti-users"></i><span>Users</span></a>
+                    <a href="{{ route('techadmin.roles.index') }}" class="sb-item {{ $on('techadmin.roles.index') }}"><i class="ti ti-shield-lock"></i><span>Roles</span></a>
+                    <a href="{{ route('holder.assets.index') }}" class="sb-item {{ $on('holder.assets.index') }}"><i class="ti ti-package"></i><span>My Assets</span></a>
+                    <a href="{{ route('holder.requests.index') }}" class="sb-item {{ $on('holder.requests.index') }}"><i class="ti ti-clipboard-list"></i><span>My Requests</span></a>
                 @elseif($role === 'asset_holder')
-                    <a href="{{ route('holder.assets.index') }}" class="sb-item"><i class="ti ti-package"></i><span>My Assets</span></a>
-                    <a href="{{ route('holder.requests.index') }}" class="sb-item"><i class="ti ti-clipboard-list"></i><span>Requests</span></a>
+                    <a href="{{ route('holder.assets.index') }}" class="sb-item {{ $on('holder.assets.index') }}"><i class="ti ti-package"></i><span>My Assets</span></a>
+                    <a href="{{ route('holder.requests.index') }}" class="sb-item {{ $on('holder.requests.index') }}"><i class="ti ti-clipboard-list"></i><span>Requests</span></a>
                 @elseif($role === 'technician')
-                    <a href="{{ route('technician.workorders.index') }}" class="sb-item"><i class="ti ti-tool"></i><span>Work Orders</span></a>
-                    <a href="{{ route('holder.assets.index') }}" class="sb-item"><i class="ti ti-package"></i><span>My Assets</span></a>
-                    <a href="{{ route('technician.maintenance-schedule.index') }}" class="sb-item"><i class="ti ti-calendar-time"></i><span>Maintenance Schedule</span></a>
+                    <a href="{{ route('technician.workorders.index') }}" class="sb-item {{ $on('technician.workorders.index') }}"><i class="ti ti-tool"></i><span>Work Orders</span></a>
+                    <a href="{{ route('holder.assets.index') }}" class="sb-item {{ $on('holder.assets.index') }}"><i class="ti ti-package"></i><span>My Assets</span></a>
+                    <a href="{{ route('technician.maintenance-schedule.index') }}" class="sb-item {{ $on('technician.maintenance-schedule.index') }}"><i class="ti ti-calendar-time"></i><span>Maintenance Schedule</span></a>
                 @endif
 
                 <div class="sb-sect">General</div>
                 @php $unreadCount = \App\Models\Notification::where('recipient_id', auth()->id())->where('is_read', false)->count(); @endphp
-                <a href="{{ route('notifications.index') }}" class="sb-item"><i class="ti ti-bell"></i><span>Notifications</span>@if ($unreadCount > 0)<span style="margin-left:auto;background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px">{{ $unreadCount }}</span>@endif</a>
-                <a href="{{ route('settings.mfa') }}" class="sb-item"><i class="ti ti-settings"></i><span>Settings</span></a>
+                <a href="{{ route('notifications.index') }}" class="sb-item {{ $on('notifications.index') }}"><i class="ti ti-bell"></i><span>Notifications</span>@if ($unreadCount > 0)<span style="margin-left:auto;background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px">{{ $unreadCount }}</span>@endif</a>
+                <a href="{{ route('settings.mfa') }}" class="sb-item {{ $on('settings.mfa') }}"><i class="ti ti-settings"></i><span>Settings</span></a>
             </nav>
 
             <div class="sb-footer">
