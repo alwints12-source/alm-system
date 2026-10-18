@@ -156,6 +156,7 @@ use App\Http\Controllers\DepreciationController;
 Route::middleware('auth')->group(function () {
     Route::get('/admin/depreciation', [DepreciationController::class, 'index'])->name('admin.depreciation.index');
     Route::get('/admin/depreciation/export', [DepreciationController::class, 'exportCsv'])->name('admin.depreciation.export');
+    Route::get('/admin/depreciation/pdf', [DepreciationController::class, 'exportPdf'])->name('admin.depreciation.pdf');
 });
 
 use App\Http\Controllers\ReportsController;

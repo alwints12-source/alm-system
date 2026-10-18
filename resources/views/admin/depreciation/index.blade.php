@@ -6,7 +6,7 @@
             <div class="pt">Depreciation management</div>
         </div>
         <div style="display:flex;gap:8px">
-            <button class="btn sm" disabled title="Coming in a later sprint"><i class="ti ti-file-type-pdf" style="font-size:13px"></i> PDF</button>
+            <a href="{{ route('admin.depreciation.pdf') }}" class="btn sm"><i class="ti ti-file-type-pdf" style="font-size:13px"></i> PDF</a>
             <a href="{{ route('admin.depreciation.export') }}" class="btn sm"><i class="ti ti-file-type-xls" style="font-size:13px"></i> Excel (CSV)</a>
         </div>
     </div>
