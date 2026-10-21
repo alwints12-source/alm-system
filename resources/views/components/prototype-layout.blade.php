@@ -124,7 +124,7 @@
                             <div style="font-size:13px;font-weight:700;color:#0f2d5e">{{ auth()->user()->name }}</div>
                             <div style="font-size:11.5px;color:#64748b">{{ \Illuminate\Support\Str::headline(auth()->user()->role) }}</div>
                         </div>
-                        <a href="{{ route('profile.edit') }}" style="display:block;padding:8px 10px;font-size:12.5px;color:#334155;text-decoration:none;border-radius:6px">Profile</a>
+                        <a href="{{ route('settings.profile') }}" style="display:block;padding:8px 10px;font-size:12.5px;color:#334155;text-decoration:none;border-radius:6px">Profile</a>
                         <a href="{{ url('/settings/mfa') }}" style="display:block;padding:8px 10px;font-size:12.5px;color:#334155;text-decoration:none;border-radius:6px">Security (MFA)</a>
                         <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit" style="width:100%;text-align:left;background:none;border:none;padding:8px 10px;font-size:12.5px;color:#b91c1c;cursor:pointer;border-radius:6px">Sign out</button></form>
                     </div>
