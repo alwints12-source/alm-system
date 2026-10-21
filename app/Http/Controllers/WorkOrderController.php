@@ -161,7 +161,7 @@ class WorkOrderController extends Controller
                 $this->logActivity(
                     $workOrder,
                     $responseBreached
-                        ? "SLA response target missed ({$policy->response_time_hours}h target)"
+                        ? "SLA response target missed ({$policy->response_label} target)"
                         : "SLA policy applied: {$policy->name}"
                 );
             }
@@ -329,7 +329,7 @@ class WorkOrderController extends Controller
                         'sla_breached'    => true,
                         'sla_breached_at' => $completedAt,
                     ]);
-                    $this->logActivity($workOrder, "SLA resolution target missed ({$workOrder->slaPolicy->resolution_time_hours}h target)");
+                    $this->logActivity($workOrder, "SLA resolution target missed ({$workOrder->slaPolicy->resolution_label} target)");
                 } else {
                     $this->logActivity($workOrder, 'Resolved within SLA target');
                 }

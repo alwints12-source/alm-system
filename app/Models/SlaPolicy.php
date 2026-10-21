@@ -21,7 +21,32 @@ class SlaPolicy extends Model
     {
         return [
             'is_active' => 'boolean',
+            'response_time_hours' => 'float',
+            'resolution_time_hours' => 'float',
         ];
+    }
+
+    /** Formats a number of hours as "30 min", "4h" or "1h 30 min". */
+    public static function formatHours(float $hours): string
+    {
+        $minutes = (int) round($hours * 60);
+        if ($minutes < 60) {
+            return $minutes . ' min';
+        }
+        $h = intdiv($minutes, 60);
+        $m = $minutes % 60;
+
+        return $m === 0 ? $h . 'h' : $h . 'h ' . $m . ' min';
+    }
+
+    public function getResponseLabelAttribute(): string
+    {
+        return self::formatHours((float) $this->response_time_hours);
+    }
+
+    public function getResolutionLabelAttribute(): string
+    {
+        return self::formatHours((float) $this->resolution_time_hours);
     }
 
     public function category()

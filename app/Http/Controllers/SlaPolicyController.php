@@ -193,14 +193,33 @@ class SlaPolicyController extends Controller
 
     private function validatePolicy(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'name'                   => ['required', 'string', 'max:150'],
             'description'            => ['nullable', 'string'],
             'priority'               => ['required', 'in:critical,high,medium,low'],
             'maintenance_type'       => ['nullable', 'in:preventive,corrective,predictive,emergency'],
             'category_id'            => ['nullable', 'exists:asset_categories,id'],
-            'response_time_hours'    => ['required', 'integer', 'min:1'],
-            'resolution_time_hours'  => ['required', 'integer', 'gte:response_time_hours'],
+            'response_time_value'    => ['required', 'integer', 'min:1', 'max:100000'],
+            'response_time_unit'     => ['required', 'in:minutes,hours'],
+            'resolution_time_value'  => ['required', 'integer', 'min:1', 'max:100000'],
+            'resolution_time_unit'   => ['required', 'in:minutes,hours'],
         ]);
+
+        $toHours = fn (int $value, string $unit): float => $unit === 'minutes' ? round($value / 60, 6) : (float) $value;
+
+        $response = $toHours((int) $data['response_time_value'], $data['response_time_unit']);
+        $resolution = $toHours((int) $data['resolution_time_value'], $data['resolution_time_unit']);
+
+        if ($resolution < $response) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'resolution_time_value' => 'The resolution target must be at least as long as the response target.',
+            ]);
+        }
+
+        unset($data['response_time_value'], $data['response_time_unit'], $data['resolution_time_value'], $data['resolution_time_unit']);
+        $data['response_time_hours'] = $response;
+        $data['resolution_time_hours'] = $resolution;
+
+        return $data;
     }
 }
