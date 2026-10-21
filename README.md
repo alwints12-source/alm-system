@@ -1,61 +1,111 @@
-# DOST-PES Asset Lifecycle Management System
+# 🏢 Apartment Management System
 
-A web application for managing the full lifecycle of organisational assets: registration, assignment to custodians, maintenance and work orders, transfers, disposal, depreciation and reporting. Built with Laravel and PostgreSQL for DOST-PES.
+A MERN-stack web application that helps residential apartment associations manage tenants, flats, maintenance, and billing.
 
-## Requirements
+---
 
-- PHP 8.3 or newer, with the pdo_pgsql, mbstring, xml, gd and zip extensions
-- Composer 2
-- PostgreSQL 14 or newer (developed on PostgreSQL 18)
-- Node.js 20 or newer, with npm
+## 🚀 Features
+- **User Authentication & Authorization** (JWT, protected routes, role-based access)
+- **Tenant Management** (add, update, delete tenants)
+- **Flat Management** (track apartment flats and occupancy)
+- **Maintenance Requests** (submit, view, and resolve issues)
+- **Billing System** (generate and manage bills for tenants)
+- **Secure Login/Register** with password hashing
 
-## Installation
+---
 
-~~~bash
-git clone https://github.com/alwints12-source/alm-system.git
-cd alm-system
-composer install
-npm install
-npm run build
-cp .env.example .env
-php artisan key:generate
-~~~
+## 📂 Project Structure
+```
+apartment_management_system/
+├── backend/        # Express.js, MongoDB, APIs
+│   ├── config/     # Database connection
+│   ├── middleware/ # Auth middleware
+│   ├── models/     # Mongoose schemas
+│   ├── routes/     # API routes
+│   └── server.js   # Express app entrypoint
+├── frontend/       # React.js, Context API, Pages
+│   ├── src/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── pages/
+│   │   └── App.js
+└── README.md
+```
 
-Create an empty PostgreSQL database named `alm_system`, then open `.env` and set `DB_USERNAME` and `DB_PASSWORD` to match your PostgreSQL account.
+---
 
-~~~bash
-php artisan migrate --seed
-php artisan storage:link
-php artisan serve
-~~~
+## 🛠️ Installation & Setup
 
-Open http://127.0.0.1:8000 in a browser. On Windows, use the same commands in PowerShell, and copy `.env.example` to `.env` with `copy .env.example .env`.
+### 1. Clone the repo
+```bash
+git clone https://github.com/alwints12-source/Apartment-Manangement-Systems.git
+cd apartment_management_system
+```
 
-## Starting accounts
+### 2. Install dependencies
+```bash
+cd backend && npm install
+cd ../frontend && npm install
+```
 
-The seeder creates one account for each role. All four use the password `password`. **Change these passwords, or deactivate the accounts, before any real use.**
+### 3. Setup environment
+In **backend/.env**:
+```
+MONGO_URI=mongodb+srv://<your-cluster>
+JWT_SECRET=your_jwt_secret
+PORT=5001
+```
 
-| Role | Email |
-|------|-------|
-| Administrative Admin | admin@test.com |
-| Technical Admin | techadmin@test.com |
-| Asset Holder | holder@test.com |
-| Technician | technician@test.com |
+### 4. Run the app
+Backend:
+```bash
+cd backend
+npm run dev
+```
 
-Self-registration is disabled. The Technical Admin creates all other accounts from the Users page.
+Frontend:
+```bash
+cd frontend
+npm start
+```
 
-## Roles
+---
 
-- **Administrative Admin**: registers and assigns assets, approves requests, transfers and disposals, manages SLA policies and maintenance schedules, and views reports and depreciation.
-- **Technical Admin**: creates and manages user accounts and views roles. Has no access to asset data.
-- **Technician**: works on assigned work orders and the maintenance schedule.
-- **Asset Holder**: views the assets in their custody, reports issues and requests transfers.
+## 🧪 Jira Workflow
+- **Epic: AMS-1 User Authentication & Authorization**
+- Stories: AMS-2 Register, AMS-3 Login, AMS-4 Role-Based Access
+- Subtasks: AMS-5..AMS-10 etc.
+- Feature branches mapped to Jira tickets (e.g. `feature/AMS-2-register`).
 
-Every role can hold assets, acknowledge assignments and report issues on assets in their own custody.
+---
 
-## Notes for deployment
+## 📌 Branching Strategy
+- `main` → stable production-ready code
+- `feature/*` → one branch per Jira ticket
+- Use PRs with descriptive commit messages (`AMS-5: backend register API`)
 
-- `php artisan serve` is for development only. In production use nginx or Apache with PHP-FPM and HTTPS.
-- Set `APP_ENV=production` and `APP_DEBUG=false` in `.env`.
-- Email is set to `MAIL_MAILER=log`, so password reset links are written to `storage/logs/laravel.log` instead of being sent. Configure an SMTP service in `.env` so reset emails are delivered.
-- Uploaded asset photos are stored in `storage/app/public`. Include this folder, and the database, in backups.
+---
+
+## 📸 Screenshots
+(Add images of login page, dashboard, etc.)
+
+---
+
+## 👨‍💻 Tech Stack
+- **Frontend:** React.js, Context API, Axios
+- **Backend:** Node.js, Express.js, JWT, Mongoose
+- **Database:** MongoDB
+- **Dev Tools:** GitHub, Jira, CI/CD (to be integrated)
+
+---
+
+## 🤝 Contributing
+1. Create a feature branch (`git checkout -b feature/AMS-XYZ`)
+2. Commit changes (`git commit -m "AMS-XYZ: description"`)
+3. Push branch (`git push origin feature/AMS-XYZ`)
+4. Open a Pull Request
+
+---
+
+## 📜 License
+MIT License © 2025
