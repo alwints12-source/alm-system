@@ -1,111 +1,112 @@
-# 🏢 Apartment Management System
+# DOST-PES Asset Lifecycle Management (ALM) System
 
-A MERN-stack web application that helps residential apartment associations manage tenants, flats, maintenance, and billing.
+A web application that tracks DOST-PES physical assets from registration through custody, maintenance, transfer and disposal.
 
----
+Built by **Dev Logic (Group 41)** for **DOST-PES** as a QUT IFN736 industry project. System version **v2.4.1**.
 
-## 🚀 Features
-- **User Authentication & Authorization** (JWT, protected routes, role-based access)
-- **Tenant Management** (add, update, delete tenants)
-- **Flat Management** (track apartment flats and occupancy)
-- **Maintenance Requests** (submit, view, and resolve issues)
-- **Billing System** (generate and manage bills for tenants)
-- **Secure Login/Register** with password hashing
+## Features
 
----
+- **Asset register:** tag, category, location, serial number, warranty, useful life, salvage value and photos.
+- **Custody:** assign an asset to a holder, who must acknowledge receipt.
+- **Maintenance:** issue reports, approval and technician assignment, five-step checklist, activity log and SLA response/resolution targets (set in minutes or hours).
+- **Scheduled maintenance:** recurring schedules (daily to annual); a daily job creates the work order when a schedule falls due and notifies the default technician.
+- **Transfers and disposals:** requests with admin approval.
+- **Depreciation and reports:** straight-line depreciation, calculated monthly; reports exportable as PDF, Excel or CSV.
+- **Security:** four roles with enforced area access, optional MFA, accounts created only by a Technical Admin (self-registration is disabled).
 
-## 📂 Project Structure
-```
-apartment_management_system/
-├── backend/        # Express.js, MongoDB, APIs
-│   ├── config/     # Database connection
-│   ├── middleware/ # Auth middleware
-│   ├── models/     # Mongoose schemas
-│   ├── routes/     # API routes
-│   └── server.js   # Express app entrypoint
-├── frontend/       # React.js, Context API, Pages
-│   ├── src/
-│   │   ├── components/
-│   │   ├── context/
-│   │   ├── pages/
-│   │   └── App.js
-└── README.md
-```
+| Role | Area | Main tasks |
+|:--|:--|:--|
+| Administrative Admin | `/admin` | Registers and assigns assets; approves requests, transfers and disposals; manages SLA policies and maintenance schedules; views reports and depreciation |
+| Technical Admin | `/techadmin` | Creates, activates and deactivates user accounts; views roles |
+| Technician | `/technician` | Works assigned work orders; views the maintenance schedule |
+| Asset Holder | `/holder` | Acknowledges assets in their custody; reports issues; requests transfers |
 
----
+Every role can hold assets, acknowledge assignments and report issues on its own assets.
 
-## 🛠️ Installation & Setup
+## Tech stack
 
-### 1. Clone the repo
+| Layer | Technology |
+|:--|:--|
+| Framework | Laravel 13 |
+| Language | PHP 8.4 or newer (the committed `composer.lock` requires 8.4.1) |
+| Database | PostgreSQL 15 or newer (developed on 18) |
+| Web server | nginx with PHP-FPM, or Apache, with HTTPS |
+| Build tools | Composer 2; Node.js 20 or newer with npm |
+| File storage | Server disk by default; S3 optional (needs a small code change) |
+
+## Quick start (laptop, for testing and training)
+
+Requires PHP 8.4+ (with the `pdo_pgsql`, `mbstring`, `xml`, `curl`, `zip`, `bcmath`, `intl` and `gd` extensions), Composer 2, Node.js 20+ and PostgreSQL 15+. `php artisan serve` is for testing only, not production.
+
 ```bash
-git clone https://github.com/alwints12-source/Apartment-Manangement-Systems.git
-cd apartment_management_system
+git clone https://github.com/alwints12-source/alm-system.git
+cd alm-system
+composer install
+npm install
+npm run build
+cp .env.example .env
+php artisan key:generate
 ```
 
-### 2. Install dependencies
+On Windows, run the same commands in PowerShell and use `copy .env.example .env`.
+
+Create an empty PostgreSQL database named `alm_system`, then set `DB_USERNAME` and `DB_PASSWORD` in `.env`. Set `APP_URL` to the exact address you open in the browser, including the port.
+
 ```bash
-cd backend && npm install
-cd ../frontend && npm install
+php artisan migrate --seed
+php artisan storage:link
+php artisan serve
 ```
 
-### 3. Setup environment
-In **backend/.env**:
-```
-MONGO_URI=mongodb+srv://<your-cluster>
-JWT_SECRET=your_jwt_secret
-PORT=5001
-```
+`migrate` builds all 27 tables from `database/schema/base_schema.sql` and then applies the later migrations. `--seed` adds the four starter accounts, seven asset categories and six locations; the asset register starts empty.
 
-### 4. Run the app
-Backend:
+To run the maintenance scheduler on a laptop, leave this running in a second terminal:
+
 ```bash
-cd backend
-npm run dev
+php artisan schedule:work
 ```
 
-Frontend:
-```bash
-cd frontend
-npm start
-```
+Open <http://127.0.0.1:8000> and sign in with one of the seeded test accounts:
 
----
+| Role | Email | Password |
+|:--|:--|:--|
+| Administrative Admin | `admin@test.com` | `password` |
+| Technical Admin | `techadmin@test.com` | `password` |
+| Asset Holder | `holder@test.com` | `password` |
+| Technician | `technician@test.com` | `password` |
 
-## 🧪 Jira Workflow
-- **Epic: AMS-1 User Authentication & Authorization**
-- Stories: AMS-2 Register, AMS-3 Login, AMS-4 Role-Based Access
-- Subtasks: AMS-5..AMS-10 etc.
-- Feature branches mapped to Jira tickets (e.g. `feature/AMS-2-register`).
+These accounts are for local testing and training only. Never use them on a live server: change every password, or deactivate the accounts, before go-live (see the Deployment Guide).
 
----
+## Configuration notes
 
-## 📌 Branching Strategy
-- `main` → stable production-ready code
-- `feature/*` → one branch per Jira ticket
-- Use PRs with descriptive commit messages (`AMS-5: backend register API`)
+- **Scheduler:** recurring maintenance needs Laravel's scheduler. On a server, add one cron entry for the web user. Once a day, `maintenance:generate-work-orders` creates a work order for each active schedule that is due (unless one is already open), assigns it to the schedule's default technician and notifies them. Without the cron entry (or `schedule:work`), no work orders are created from schedules.
 
----
+  ```
+  * * * * * cd /var/www/alm && php artisan schedule:run >> /dev/null 2>&1
+  ```
 
-## 📸 Screenshots
-(Add images of login page, dashboard, etc.)
+- **Photos:** stored in `storage/app/public` and served through the `public/storage` link (`php artisan storage:link`). Uploads of up to 5 MB need PHP's `upload_max_filesize` and `post_max_size` raised above the default.
+- **Email:** `MAIL_MAILER=log` writes messages to `storage/logs/laravel.log`. Password-reset emails reach users only once an SMTP server is configured in `.env`.
+- **Backups:** back up the database and the `storage/app/public` folder together.
 
----
+## Documentation
 
-## 👨‍💻 Tech Stack
-- **Frontend:** React.js, Context API, Axios
-- **Backend:** Node.js, Express.js, JWT, Mongoose
-- **Database:** MongoDB
-- **Dev Tools:** GitHub, Jira, CI/CD (to be integrated)
+| Document | Purpose |
+|:--|:--|
+| User Manual | How to use the system, by role |
+| Deployment Guide | Hosting, installing, backups and updating |
+| Technical Specifications | Architecture, data, security and known limitations |
+| System Architecture | One-page architecture diagram |
+| Database Schema and ERD | Every table and column, with entity-relationship diagrams |
 
----
+## Known limitations
 
-## 🤝 Contributing
-1. Create a feature branch (`git checkout -b feature/AMS-XYZ`)
-2. Commit changes (`git commit -m "AMS-XYZ: description"`)
-3. Push branch (`git push origin feature/AMS-XYZ`)
-4. Open a Pull Request
+See the Technical Specifications. Main points: no audit trail yet, no self-service MFA reset, asset categories and locations cannot be edited in the application, S3 storage needs a code change, and the system has not been load-tested or independently security-tested.
 
----
+## Security
 
-## 📜 License
-MIT License © 2025
+Never commit `.env` or real credentials. Set `APP_ENV=production` and `APP_DEBUG=false` on any server.
+
+## Contact
+
+Dev Logic (Group 41), Queensland University of Technology.
