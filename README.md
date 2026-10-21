@@ -28,15 +28,15 @@ Every role can hold assets, acknowledge assignments and report issues on its own
 | Layer | Technology |
 |:--|:--|
 | Framework | Laravel 13 |
-| Language | PHP 8.4 or newer (the committed `composer.lock` requires 8.4.1) |
+| Language | PHP 8.4.1 or newer (required by the committed `composer.lock`) |
 | Database | PostgreSQL 15 or newer (developed on 18) |
 | Web server | nginx with PHP-FPM, or Apache, with HTTPS |
-| Build tools | Composer 2; Node.js 20 or newer with npm |
+| Build tools | Composer 2; Node.js 22.12 or newer with npm (required by the committed `package-lock.json`) |
 | File storage | Server disk by default; S3 optional (needs a small code change) |
 
 ## Quick start (laptop, for testing and training)
 
-Requires PHP 8.4+ (with the `pdo_pgsql`, `mbstring`, `xml`, `curl`, `zip`, `bcmath`, `intl` and `gd` extensions), Composer 2, Node.js 20+ and PostgreSQL 15+. `php artisan serve` is for testing only, not production.
+Requires PHP 8.4.1+ (with the `pdo_pgsql`, `fileinfo`, `gd`, `mbstring`, `curl`, `zip`, `bcmath` and `intl` extensions), Composer 2, Node.js 22.12+ and PostgreSQL 15+. `php artisan serve` is for testing only, not production. Run `composer check-platform-reqs --lock` before `composer install` to confirm PHP and its extensions are ready. Step-by-step Mac and Windows instructions are in the Setup Guide.
 
 ```bash
 git clone https://github.com/alwints12-source/alm-system.git
@@ -48,7 +48,7 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-On Windows, run the same commands in PowerShell and use `copy .env.example .env`.
+On Windows, run the same commands in PowerShell, but use `npm.cmd install` and `npm.cmd run build` (PowerShell often blocks `npm`) and `copy .env.example .env`. The Setup Guide (Mac and Windows) covers selecting the right PHP and Node.js in Laravel Herd and enabling missing PHP extensions.
 
 Create an empty PostgreSQL database named `alm_system`, then set `DB_USERNAME` and `DB_PASSWORD` in `.env`. Set `APP_URL` to the exact address you open in the browser, including the port.
 
@@ -98,10 +98,11 @@ These accounts are for local testing and training only. Never use them on a live
 | Technical Specifications | Architecture, data, security and known limitations |
 | System Architecture | One-page architecture diagram |
 | Database Schema and ERD | Every table and column, with entity-relationship diagrams |
+| Setup Guide (Mac and Windows) | Step-by-step laptop installation for the team |
 
 ## Known limitations
 
-See the Technical Specifications. Main points: no audit trail yet, no self-service MFA reset, asset categories and locations cannot be edited in the application, S3 storage needs a code change, and the system has not been load-tested or independently security-tested.
+See the Technical Specifications. Main points: the application time zone is fixed to `Australia/Brisbane` in `config/app.php` (change it to `Asia/Manila` for DOST-PES), no audit trail yet, no self-service MFA reset, asset categories and locations cannot be edited in the application, S3 storage needs a code change, and the system has not been load-tested or independently security-tested.
 
 ## Security
 
