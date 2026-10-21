@@ -160,8 +160,8 @@
                         <td><span class="badge {{ $priorityClass }}">{{ ucfirst($policy->priority) }}</span></td>
                         <td>{{ $policy->maintenance_type ? ucfirst($policy->maintenance_type) : 'Any' }}</td>
                         <td>{{ $policy->category->name ?? 'Any' }}</td>
-                        <td>{{ $policy->response_time_hours }}h</td>
-                        <td>{{ $policy->resolution_time_hours }}h</td>
+                        <td>{{ $policy->response_label }}</td>
+                        <td>{{ $policy->resolution_label }}</td>
                         <td>
                             @if ($policy->is_active)
                                 <span class="badge b-act">Active</span>

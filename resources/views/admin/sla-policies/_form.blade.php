@@ -52,13 +52,41 @@
     Leave type and/or category blank for a broader policy that applies more widely. A specific match (priority + type + category) always takes precedence over a broader one at the same priority.
 </div>
 
+@php
+    // Show stored hours as whole hours, or as minutes when shorter or not a whole number of hours.
+    $splitHours = function ($hours) {
+        if ($hours === null || $hours === '') {
+            return ['', 'hours'];
+        }
+        $hours = (float) $hours;
+        if (abs($hours - round($hours)) < 0.00001) {
+            return [(int) round($hours), 'hours'];
+        }
+        return [(int) round($hours * 60), 'minutes'];
+    };
+    [$respValue, $respUnit] = $splitHours($slaPolicy->response_time_hours ?? null);
+    [$resoValue, $resoUnit] = $splitHours($slaPolicy->resolution_time_hours ?? null);
+@endphp
+
 <div class="fg2">
     <div class="fg">
-        <label>Response time target (hours) *</label>
-        <input type="number" name="response_time_hours" min="1" value="{{ old('response_time_hours', $slaPolicy->response_time_hours ?? '') }}" required>
+        <label>Response time target *</label>
+        <div style="display:flex;gap:8px">
+            <input type="number" name="response_time_value" min="1" value="{{ old('response_time_value', $respValue) }}" required style="flex:1">
+            <select name="response_time_unit" style="width:110px">
+                <option value="minutes" {{ old('response_time_unit', $respUnit) === 'minutes' ? 'selected' : '' }}>Minutes</option>
+                <option value="hours" {{ old('response_time_unit', $respUnit) === 'hours' ? 'selected' : '' }}>Hours</option>
+            </select>
+        </div>
     </div>
     <div class="fg">
-        <label>Resolution time target (hours) *</label>
-        <input type="number" name="resolution_time_hours" min="1" value="{{ old('resolution_time_hours', $slaPolicy->resolution_time_hours ?? '') }}" required>
+        <label>Resolution time target *</label>
+        <div style="display:flex;gap:8px">
+            <input type="number" name="resolution_time_value" min="1" value="{{ old('resolution_time_value', $resoValue) }}" required style="flex:1">
+            <select name="resolution_time_unit" style="width:110px">
+                <option value="minutes" {{ old('resolution_time_unit', $resoUnit) === 'minutes' ? 'selected' : '' }}>Minutes</option>
+                <option value="hours" {{ old('resolution_time_unit', $resoUnit) === 'hours' ? 'selected' : '' }}>Hours</option>
+            </select>
+        </div>
     </div>
 </div>
